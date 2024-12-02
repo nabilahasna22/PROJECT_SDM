@@ -45,7 +45,7 @@
                         <p>Laporan Kegiatan</p>
                     </a>
                 </li> 
-                <li class="nav-header">Data Kegiatan</li>
+                <li class="nav-header">Rekap Kegiatan</li>
                 <li class="nav-item">
                     <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
                         <i class="nav-icon far fa-calendar"></i>
@@ -96,7 +96,7 @@
             <li class="nav-item">
                 <a href="{{ url('/kegiatan') }}" class="nav-link {{ $activeMenu == 'kegiatan' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-calendar-alt"></i>
-                    <p>Daftar Kegiatan</p>
+                    <p>Kelola Kegiatan</p>
                 </a>
             </li>
             <li class="nav-item">
