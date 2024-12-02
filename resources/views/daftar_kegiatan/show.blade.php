@@ -1,4 +1,5 @@
 @extends('layouts.template')
+
 @section('content')
     <div class="card card-outline card-primary">
         <div class="card-header">
@@ -15,15 +16,11 @@
                 <table class="table table-bordered table-striped table-hover table-sm">
                     <tr>
                         <th>ID</th>
-                        <td>{{ $daftar_kegiatan->kegiatan_id }}</td>
+                        <td>{{ $daftar_kegiatan->daftar_kegiatan_id }}</td>
                     </tr>
                     <tr>
-                        <th>Kategori</th>
-                        <td>{{ $daftar_kegiatan->kategori->kategori_nama }}</td>
-                    </tr>
-                    <tr>
-                        <th>Nama Kegiatan</th>
-                        <td>{{ $daftar_kegiatan->kegiatan_nama }}</td>
+                        <th>Nama daftar_kegiatan</th>
+                        <td>{{ $daftar_kegiatan->daftar_kegiatan_nama }}</td>
                     </tr>
                     <tr>
                         <th>Deskripsi</th>
@@ -41,9 +38,17 @@
                         <th>Status</th>
                         <td>{{ $daftar_kegiatan->status }}</td>
                     </tr>
+                    <tr>
+                        <th>Kategori</th>
+                        <td>{{ $daftar_kegiatan->kategori->kategori_nama }}</td>
+                    </tr>
+                    <tr>
+                        <th>Wilayah</th> <!-- Menambahkan kolom wilayah -->
+                        <td>{{ $daftar_kegiatan->wilayah->nama_wilayah }}</td> <!-- Menampilkan nama wilayah -->
+                    </tr>
                 </table>
             @endif
-            <a href="{{ url('kegiatan') }}" class="btn btn-sm btn-default mt-2">Kembali</a>
+            <a href="{{ url('daftar_kegiatan') }}" class="btn btn-sm btn-default mt-2">Kembali</a>
         </div>
     </div>
 @endsection
