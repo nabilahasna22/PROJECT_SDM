@@ -53,7 +53,7 @@ Route::group(['prefix' => 'level'], function () {
     Route::put('/{id}', [LevelController::class, 'update']);     // menyimpan perubahan data level
     Route::delete('/{id}', [LevelController::class, 'destroy']); // menghapus data level
 });
-/*
+
 Route::group(['prefix' => 'kategori'], function () {
     Route::get('/', [KategoriController::class, 'index']);          // menampilkan halaman awal level
     Route::post('/list', [KategoriController::class, 'list']);      // menampilkan data level dalam bentuk json untuk datatables
@@ -97,5 +97,5 @@ Route::group(['prefix' => 'detailkegiatan'], function () {
     Route::get('/{id}/edit', [DetailKegiatanController::class, 'edit']);  // menampilkan halaman form edit level
     Route::put('/{id}', [DetailKegiatanController::class, 'update']);     // menyimpan perubahan data level
     Route::delete('/{id}', [DetailKegiatanController::class, 'destroy']); // menghapus data level
-});*/
+});
 });
