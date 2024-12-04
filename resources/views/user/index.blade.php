@@ -9,7 +9,22 @@
         </div>
         <div class="card-body">
             <!-- Filter data -->
-            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group row">
+                        <label class="col-1 control-label col-form-label" for="level_id">Filter:</label>
+                        <div class="col-3">
+                            <select class="form-control" id="level_id" name="level_id" required>
+                                <option value="">- Semua -</option>
+                                @foreach($level as $item)
+                                    <option value="{{ $item->level_id }}">{{ $item->level_nama }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Level Pengguna</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
             @if (session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
@@ -49,16 +64,14 @@
         var tableUser;
         $(document).ready(function() {
             tableUser = $('#table-user').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    "url": "{{ url('user/list') }}",
-                    "dataType": "json",
-                    "type": "POST",
-                    "data": function(d) {
-                        d.filter_level = $('.filter_level').val();
-                    }
-                },
+            ajax: {
+                "url": "{{ url('user/list') }}",
+                "dataType": "json",
+                "type": "POST",
+                "data": function(d){
+                    d.level_id=$('#level_id').val();
+                }
+            },
                 columns: [{
                     data: "DT_RowIndex",
                     className: "text-center",
@@ -107,15 +120,9 @@
                 }]
             });
 
-            $('#table-user_filter input').unbind().bind().on('keyup', function(e) {
-                if (e.keyCode == 13) { // enter key
-                    tableUser.search(this.value).draw();
-                }
-            });
-
-            $('.filter_level').change(function() {
-                tableUser.draw();
-            });
+            $('#level_id').on('change', function(){
+            tableUser.ajax.reload();
+        });
         });
     </script>
 @endpush
