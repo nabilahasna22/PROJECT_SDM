@@ -62,7 +62,7 @@
     <table class="border-bottom-header">
         <tr>
             <td width="15%" class="text-center">
-                <img src="{{ asset('polinema-bw.png') }}" class="image">
+                <img src="{{ asset('image/polinemabg.png') }}" class="image">
             </td>
             <td width="85%">
                 <span class="text-center d-block font-11 font-bold mb-1">KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET, DAN TEKNOLOGI</span>
@@ -75,38 +75,32 @@
     </table>
     <h3 class="text-center">LAPORAN DATA KEGIATAN</h3>
     <table class="border-all">
-        <tr>
-            <th>No</th>
-            <td>{{ $kegiatan->kegiatan_id }}</td>
-        </tr>
-        <tr>
-            <th>Nama Kegiatan</th>
-            <td>{{ $kegiatan->kegiatan_nama }}</td>
-        </tr>
-        <tr>
-            <th>Deskripsi</th>
-            <td>{{ $kegiatan->deskripsi }}</td>
-        </tr>
-        <tr>
-            <th>Tanggal Mulai</th>
-            <td>{{ \Carbon\Carbon::parse($kegiatan->tanggal_mulai)->format('d-m-Y') }}</td>
-        </tr>
-        <tr>
-            <th>Tanggal Selesai</th>
-            <td>{{ \Carbon\Carbon::parse($kegiatan->tanggal_selesai)->format('d-m-Y') }}</td>
-        </tr>
-        <tr>
-            <th>Status</th>
-            <td>{{ $kegiatan->status }}</td>
-        </tr>
-        <tr>
-            <th>Jenis Kegiatan</th>
-            <td>{{ $kegiatan->jenis_kegiatan }}</td>
-        </tr>
-        <tr>
-            <th>Kategori</th>
-            <td>{{ $kegiatan->kategori->kategori_nama }}</td>
-        </tr>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Kegiatan</th>
+                <th>Deskripsi</th>
+                <th>Tanggal Mulai</th>
+                <th>Tanggal Selesai</th>
+                <th>Status</th>
+                <th>Wilayah</th>
+                <th>Kategori</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($kegiatan as $k)
+            <tr>
+                <td class="text-center">{{ $loop->iteration }}</td>
+                <td>{{ $k->kegiatan_nama }}</td>
+                <td>{{ $k->deskripsi }}</td>
+                <td>{{ \Carbon\Carbon::parse($k->tanggal_mulai)->format('d-m-Y') }}</td>
+                <td>{{ \Carbon\Carbon::parse($k->tanggal_selesai)->format('d-m-Y') }}</td>
+                <td>{{ $k->status }}</td>
+                <td>{{ $k->wilayah->nama_wilayah }}</td>
+                <td>{{ $k->kategori->kategori_nama }}</td>
+            </tr>
+            @endforeach
+        </tbody>
     </table>
 </body>
-</html>
+</html>    

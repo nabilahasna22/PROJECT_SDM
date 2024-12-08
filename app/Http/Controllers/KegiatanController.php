@@ -192,21 +192,17 @@ public function store_ajax(Request $request)
 
     public function delete_ajax(Request $request, $id)
     {
-        if ($request->ajax() || $request->wantsJson()) {
             $kegiatan = KegiatanModel::find($id);
             if ($kegiatan) {
                 $kegiatan->delete();
-                return response()->json([
-                    'status'  => true,
-                    'message' => 'Data kegiatan berhasil dihapus'
-                ]);
+                return redirect('/kegiatan');
             } else {
                 return response()->json([
                     'status'  => false,
                     'message' => 'Data kegiatan tidak ditemukan'
                 ]);
             }
-        }
+        
         return redirect('/');
     }
 
