@@ -41,12 +41,6 @@
                 
                 <li class="nav-header">Rekap Kegiatan</li>
                 <li class="nav-item">
-                    <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>Daftar Kegiatan</p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="{{ url('/progres') }}" class="nav-link {{ $activeMenu == 'progres' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
                         <p>Progres Kegiatan</p>
@@ -115,7 +109,7 @@
             
             <!-- Dosen: Akses hanya Data Kegiatan, Dashboard, dan Edit Profile -->
             @if(auth()->user()->level_id == '2')
-                <li class="nav-header">Data Kegiatan</li>
+                <li class="nav-header">Informasi Kegiatan</li>
                 <li class="nav-item">
                     <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
                         <i class="nav-icon far fa-calendar"></i>
@@ -131,7 +125,7 @@
                 <li class="nav-item">
                     <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
-                        <p>Rekap Partisipasi</p>
+                        <p>Kegiatan Diikuti</p>
                     </a>
                 </li>
                 <li class="nav-item">
