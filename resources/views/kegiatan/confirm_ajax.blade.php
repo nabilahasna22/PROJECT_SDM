@@ -35,7 +35,7 @@
                     </div>
                     <table class="table table-sm table-bordered table-striped">
                         <tr>
-                            <th class="text-right col-3">No:</th>
+                            <th class="text-right col-3">ID: </th>
                             <td class="col-9">{{ $kegiatan->kegiatan_id }}</td>
                         </tr>
                         <tr>
@@ -59,8 +59,8 @@
                             <td class="col-9">{{ $kegiatan->status }}</td>
                         </tr>
                         <tr>
-                            <th class="text-right col-3">Jenis Kegiatan:</th>
-                            <td class="col-9">{{ $kegiatan->jenis_kegiatan }}</td>
+                            <th class="text-right col-3">Wilayah:</th>
+                            <td class="col-9">{{ $kegiatan->wilayah->nama_wilayah }}</td>
                         </tr>
                         <tr>
                             <th class="text-right col-3">Kategori:</th>
