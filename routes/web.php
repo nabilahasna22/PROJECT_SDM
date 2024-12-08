@@ -11,7 +11,7 @@ use App\Http\Controllers\DaftarKegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\ProgresController;
 use App\Http\Controllers\ProfileController;
-
+use Database\Seeders\KegiatanSeeder;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +76,12 @@ Route::group(['prefix' => 'kegiatan'], function () {
     Route::get('/{id}/edit_ajax', [KegiatanController::class, 'edit_ajax']);  // menampilkan halaman form edit level
     Route::put('/{id}/update_ajax', [KegiatanController::class, 'update_ajax']);     // menyimpan perubahan data level
     Route::post('/ajax', [KegiatanController::class, 'store_ajax']);         // menyimpan data level baru
+    Route::get('/{id}/delete_ajax', [KegiatanController::class, 'confirm_ajax']); // menampilkan konfirmasi hapus kategori via Ajax
+    Route::delete('/{id}/delete_ajax', [KegiatanController::class, 'delete_ajax']); // menghapus data kategori via Ajax
+    Route::get('/import', [KegiatanController::class, 'import']); //ajax form upload excel
+    Route::post('/import_ajax', [KegiatanController::class, 'import_ajax']); //ajax form upload excel
+    Route::get('/export_excel', [KegiatanController::class, 'export_excel']); //export excel
+    Route::get('/export_pdf', [KegiatanController::class, 'export_pdf']); //export excel
     //Route::get('/{id}', [KegiatanController::class, 'show']);       // menampilkan detail level
     Route::get('/{id}/show_ajax', [KegiatanController::class, 'show_ajax']);  // menampilkan halaman form edit level
     Route::delete('/{id}', [KegiatanController::class, 'destroy']); // menghapus data level

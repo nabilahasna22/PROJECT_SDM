@@ -214,64 +214,53 @@ public function store_ajax(Request $request)
     {
         return view('kegiatan.import');
     }
-
     public function import_ajax(Request $request)
-    {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'file_kegiatan' => ['required', 'mimes:xlsx', 'max:1024'],
-            ];
+{
+    $rules = [
+        'file_kegiatan' => ['required', 'mimes:xlsx', 'max:1024'],
+    ];
 
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'   => false,
-                    'message'  => 'Validasi Gagal',
-                    'msgField' => $validator->errors()
-                ]);
-            }
-
-            $file = $request->file('file_kegiatan');
-            $reader = IOFactory::createReader('Xlsx');
-            $reader->setReadDataOnly(true);
-            $spreadsheet = $reader->load($file->getRealPath());
-            $sheet = $spreadsheet->getActiveSheet();
-            $data = $sheet->toArray(null, false, true, true);
-
-            $insert = [];
-            if (count($data) > 1) {
-                foreach ($data as $baris => $value) {
-                    if ($baris > 1) {
-                        $insert[] = [
-                            'kategori_id'     => $value['A'],
-                            'kegiatan_nama'   => $value['B'],
-                            'deskripsi'       => $value['C'],
-                            'tanggal_mulai'   => $value['D'],
-                            'tanggal_selesai' => $value['E'],
-                            'status'          => $value['F'],
-                            'jenis_kegiatan'  => $value['G'],
-                            'created_at'      => now(),
-                        ];
-                    }
-                }
-            }
-
-            if (count($insert) > 0) {
-                KegiatanModel::insertOrIgnore($insert);
-            }
-
-            return response()->json([
-                'status'  => true,
-                'message' => 'Data kegiatan berhasil diimport'
-            ]);
-        } else {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Tidak ada data yang diimport'
-            ]);
-        }
-        return redirect('/');
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+        return response()->json([
+            'status'   => false,
+            'message'  => 'Validasi Gagal',
+            'msgField' => $validator->errors()
+        ]);
     }
+
+    $file = $request->file('file_kegiatan');
+    $reader = IOFactory::createReader('Xlsx');
+    $reader->setReadDataOnly(true);
+    $spreadsheet = $reader->load($file->getRealPath());
+    $sheet = $spreadsheet->getActiveSheet();
+    $data = $sheet->toArray(null, false, true, true);
+
+    $insert = [];
+    if (count($data) > 1) {
+        foreach ($data as $baris => $value) {
+            if ($baris > 1) {
+                $insert[] = [
+                    'kategori_id'      => $value['A'],
+                    'id_wilayah'       => $value['B'], // Menambahkan id_wilayah
+                    'kegiatan_nama'    => $value['C'],
+                    'deskripsi'        => $value['D'],
+                    'tanggal_mulai'    => $value['E'],
+                    'tanggal_selesai'  => $value['F'],
+                    'status'           => $value['G'],
+                    'created_at'       => now(),
+                ];
+            }
+        }
+    }
+
+    if (count($insert) > 0) {
+        KegiatanModel::insertOrIgnore($insert);
+    }
+
+    return redirect('/kegiatan');
+}
+
 
     public function export_excel()
     {
