@@ -40,6 +40,18 @@
                     </select>
                     <small id="error-kategori_id" class="text-danger"></small>
                 </div>
+                
+                <!-- Wilayah -->
+                <div class="form-group">
+                    <label>Wilayah</label>
+                    <select name="id_wilayah" id="id_wilayah" class="form-control" required>
+                        <option value="">- Pilih Wilayah -</option>
+                        @foreach ($wilayah as $w)
+                            <option {{ $w->id_wilayah == $kegiatan->id_wilayah ? 'selected' : '' }} value="{{ $w->id_wilayah }}">{{ $w->nama_wilayah }}</option>
+                        @endforeach
+                    </select>
+                    <small id="error-id_wilayah" class="text-danger"></small>
+                </div>
 
                 <!-- Nama Kegiatan -->
                 <div class="form-group">
@@ -81,26 +93,12 @@
                     <small id="error-tanggal_selesai" class="text-danger"></small>
                 </div>
 
-                <!-- Jenis Kegiatan -->
-                <div class="form-group">
-                    <label>Jenis Kegiatan</label>
-                    <input 
-                        value="{{ old('jenis_kegiatan', $kegiatan->jenis_kegiatan) }}" 
-                        type="text" 
-                        name="jenis_kegiatan" 
-                        id="jenis_kegiatan" 
-                        class="form-control" 
-                        required>
-                    <small id="error-jenis_kegiatan" class="text-danger"></small>
-                </div>
-
                 <!-- Status -->
                 <div class="form-group">
                     <label for="status">Status</label>
                     <select name="status" id="status" class="form-control" required>
-                        <option value="onprogres" {{ old('status', $kegiatan->status) == 'onprogres' ? 'selected' : '' }}>On Progres</option>
-                        <option value="completed" {{ old('status', $kegiatan->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="pending" {{ old('status', $kegiatan->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="on progres" {{ old('status', $kegiatan->status) == 'on progres' ? 'selected' : '' }}>On Progres</option>
+                        <option value="terlaksana" {{ old('status', $kegiatan->status) == 'terlaksana' ? 'selected' : '' }}>Terlaksana</option>
                     </select>
                     <small id="error-status" class="text-danger"></small>
                 </div>
@@ -112,35 +110,38 @@
         </div>
     </div>
 </form>
-@endempty
-
 <script>
     $(document).ready(function() {
         $("#form-edit").validate({
             rules: {
                 kategori_id: { required: true, number: true },
+                id_wilayah: { required: true, number: true },
                 kegiatan_nama: { required: true, minlength: 3, maxlength: 100 },
                 deskripsi: { maxlength: 255 },
                 tanggal_mulai: { required: true, date: true },
-                tanggal_selesai: { required: true, date: true },
-                jenis_kegiatan: { required: true, maxlength: 50 },
+                tanggal_selesai: { required: true, date: true },                
                 status: { required: true }
             },
             submitHandler: function(form) {
+            form.preventDefault();
                 $.ajax({
                     url: form.action,
-                    type: form.method,
+                    type: 'form.method,'
                     data: $(form).serialize(),
                     success: function(response) {
-                        if (response.status) {
+                        if (response.status) {                            
+                            $('#myModal').modal('hide');
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil',
                                 text: response.message
                             });
                             tableKegiatan.ajax.reload();
-                            $('#myModal').modal('hide');
                         } else {
+                            $('.error-text').text('');
+                            $.each(response.msgField, function(prefix, val) {
+                                $('#error-' + prefix).text(val[0]);
+                            });
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Kesalahan',
@@ -150,7 +151,19 @@
                     }
                 });
                 return false;
+            },
+                    errorElement: 'span',
+                    errorPlacement: function(error, element) {
+                        error.addClass('invalid-feedback');
+                        element.closest('.form-group').append(error);
+                    },
+                    highlight: function(element, errorClass, validClass) {
+                        $(element).addClass('is-invalid');
+                    },
+                    unhighlight: function(element, errorClass, validClass) {
+                        $(element).removeClass('is-invalid');
             }
         });
     });
 </script>
+@endempty

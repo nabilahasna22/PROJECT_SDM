@@ -7,9 +7,11 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\KegiatanController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DaftarkegiatanController;
+use App\Http\Controllers\DaftarKegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\ProgresController;
+use App\Http\Controllers\ProfileController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -69,14 +71,19 @@ Route::group(['prefix' => 'kegiatan'], function () {
     Route::get('/', [KegiatanController::class, 'index']);          // menampilkan halaman awal level
     Route::post('/list', [KegiatanController::class, 'list']);      // menampilkan data level dalam bentuk json untuk datatables
     Route::get('/create', [KegiatanController::class, 'create']);   // menampilkan halaman form tambah level
+    Route::get('/create_ajax', [KegiatanController::class, 'create_ajax']);
     Route::post('/', [KegiatanController::class, 'store']);         // menyimpan data level baru
-    Route::get('/{id}', [KegiatanController::class, 'show']);       // menampilkan detail level
     Route::get('/{id}/edit_ajax', [KegiatanController::class, 'edit_ajax']);  // menampilkan halaman form edit level
     Route::put('/{id}/update_ajax', [KegiatanController::class, 'update_ajax']);     // menyimpan perubahan data level
+    Route::post('/ajax', [KegiatanController::class, 'store_ajax']);         // menyimpan data level baru
+    //Route::get('/{id}', [KegiatanController::class, 'show']);       // menampilkan detail level
+    Route::get('/{id}/show_ajax', [KegiatanController::class, 'show_ajax']);  // menampilkan halaman form edit level
     Route::delete('/{id}', [KegiatanController::class, 'destroy']); // menghapus data level
 });
 Route::group(['prefix' => 'daftar_kegiatan'], function () {
-    Route::get('/', [DaftarkegiatanController::class, 'index']);          // menampilkan halaman awal level
+    Route::get('/', [DaftarKegiatanController::class, 'index']);          // menampilkan halaman awal level
+    Route::get('/kegiatan/user', [DaftarKegiatanController::class, 'kegiatanUser']);
+
 });
 Route::group(['prefix' => 'progres'], function () {
     Route::get('/', [ProgresController::class, 'index']);          // menampilkan halaman awal level
@@ -97,5 +104,10 @@ Route::group(['prefix' => 'detailkegiatan'], function () {
     Route::get('/{id}/edit', [DetailKegiatanController::class, 'edit']);  // menampilkan halaman form edit level
     Route::put('/{id}', [DetailKegiatanController::class, 'update']);     // menyimpan perubahan data level
     Route::delete('/{id}', [DetailKegiatanController::class, 'destroy']); // menghapus data level
+});
+Route::group(['prefix' => 'profile'], function () {
+    Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/{nip}/edit_ajax', [ProfileController::class, 'edit_ajax'])->name('profile.edit_ajax'); // Sesuaikan dengan nip
+    Route::put('/{nip}/update_ajax', [ProfileController::class, 'update_ajax'])->name('profile.update_ajax'); // Sesuaikan dengan nip
 });
 });

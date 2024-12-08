@@ -6,6 +6,7 @@ use App\Models\KategoriModel;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
@@ -51,7 +52,8 @@ class KegiatanController extends Controller
         return DataTables::of($kegiatan)
             ->addIndexColumn()
             ->addColumn('aksi', function ($kegiatan) {
-                $btn = '<a href="' . url('/kegiatan/' . $kegiatan->kegiatan_id) . '" class="btn btn-info btn-sm">Detail</a> ';
+                //$btn = '<a href="' . url('/kegiatan/' . $kegiatan->kegiatan_id) . '" class="btn btn-info btn-sm">Detail</a> ';
+                $btn = '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button>';
                 $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button>';
                 $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 return $btn;
@@ -64,39 +66,98 @@ class KegiatanController extends Controller
     public function create_ajax()
     {
         $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
-        return view('kegiatan.create_ajax')->with('kategori', $kategori);
+        $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
+        return view('kegiatan.create_ajax', [
+            'kategori' => $kategori,
+            'wilayah' => $wilayah
+        ]);
     }
 
-    public function store_ajax(Request $request)
+    public function edit_ajax(string $id)
     {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'kategori_id'     => ['required', 'integer', 'exists:kategori,kategori_id'],
-                'kegiatan_nama'   => ['required', 'string', 'max:100'],
-                'deskripsi'       => ['nullable', 'string'],
-                'tanggal_mulai'   => ['required', 'date'],
-                'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
-                'status'          => ['required', 'string', 'in:planned,ongoing,completed']
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'   => false,
-                    'message'  => 'Validasi Gagal',
-                    'msgField' => $validator->errors()
-                ]);
-            }
-
-            KegiatanModel::create($request->all());
-            return response()->json([
-                'status'  => true,
-                'message' => 'Data kegiatan berhasil disimpan'
-            ]);
-        }
-        return redirect('/');
+        $kegiatan = KegiatanModel::find($id); // Cari data kegiatan berdasarkan ID
+        $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get(); // Ambil data kategori
+        $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get(); // Ambil data wilayah
+    
+        return view('kegiatan.edit_ajax', [
+            'kegiatan' => $kegiatan,
+            'kategori' => $kategori,
+            'wilayah' => $wilayah
+        ]);
     }
     
+    public function update_ajax(Request $request, $id)
+{
+    // Validasi request
+    $rules = [
+        'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
+        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
+        'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
+        'deskripsi'        => 'nullable|string|max:500',
+        'tanggal_mulai'    => 'sometimes|date',
+        'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
+        'status'           => 'sometimes|string|in:on progres,terlaksana',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Validasi gagal.',
+            'msgField' => $validator->errors(),
+        ]);
+    }
+
+    $kegiatan = KegiatanModel::find($id);
+
+    if ($kegiatan) {
+        $kegiatan->update([
+            'kategori_id'      => $request->kategori_id ?? $kegiatan->kategori_id,
+            'id_wilayah'       => $request->id_wilayah ?? $kegiatan->id_wilayah,
+            'kegiatan_nama'    => $request->kegiatan_nama ?? $kegiatan->kegiatan_nama,
+            'deskripsi'        => $request->deskripsi ?? $kegiatan->deskripsi,
+            'tanggal_mulai'    => $request->tanggal_mulai ?? $kegiatan->tanggal_mulai,
+            'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
+            'status'           => $request->status ?? $kegiatan->status,
+        ]);
+        return redirect('/kegiatan'); 
+    }
+
+    return response()->json([
+        'status' => false,
+        'message' => 'Data kegiatan tidak ditemukan',
+    ]);
+}
+
+    
+public function store_ajax(Request $request)
+{
+    // Validasi data yang diterima dari request
+    $rules = [
+        'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
+        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
+        'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
+        'deskripsi'        => 'nullable|string|max:500',
+        'tanggal_mulai'    => 'sometimes|date',
+        'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
+        'status'           => 'sometimes|string|in:on progres,terlaksana',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status'   => false,
+            'message'  => 'Validasi Gagal',
+            'msgField' => $validator->errors()
+        ]);
+    }
+
+    KegiatanModel::create($request->all());
+
+    return redirect('/kegiatan'); 
+}
 
     public function show(string $id)
     {
@@ -106,6 +167,23 @@ class KegiatanController extends Controller
         $activeMenu = 'kegiatan';
         return view('kegiatan.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'kegiatan' => $kegiatan, 'activeMenu' => $activeMenu]);
     }
+
+    public function show_ajax(string $id)
+    {
+        $kegiatan = KegiatanModel::find($id);
+    
+        if (!$kegiatan) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data kegiatan tidak ditemukan'
+            ]);
+        }
+    
+        // Mengembalikan tampilan dengan data kegiatan
+        return view('kegiatan.show_ajax', ['kegiatan' => $kegiatan]);
+    }
+    
+
     public function confirm_ajax($id)
     {
         $kegiatan = KegiatanModel::find($id);
@@ -259,5 +337,6 @@ class KegiatanController extends Controller
         $pdf->setOption("isRemoteEnabled", true); // set true jika ada gambar dari url
         return $pdf->stream('Data Kegiatan ' . date('Y-m-d H:i:s') . '.pdf');
     }
+    
 }
  
