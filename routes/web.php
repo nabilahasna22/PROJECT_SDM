@@ -11,6 +11,7 @@ use App\Http\Controllers\DaftarKegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\ProgresController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PeriodeController;
 use Database\Seeders\KegiatanSeeder;
 
 /*
@@ -115,5 +116,13 @@ Route::group(['prefix' => 'profile'], function () {
     Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/{nip}/edit_ajax', [ProfileController::class, 'edit_ajax'])->name('profile.edit_ajax'); // Sesuaikan dengan nip
     Route::put('/{nip}/update_ajax', [ProfileController::class, 'update_ajax'])->name('profile.update_ajax'); // Sesuaikan dengan nip
+});
+Route::group(['prefix' => 'periode'], function () {
+Route::get('/', [PeriodeController::class, 'index']);
+Route::post('/list', [PeriodeController::class, 'list']);
+Route::get('/create', [PeriodeController::class, 'create']);
+Route::get('/create_ajax', [PeriodeController::class, 'create_ajax']);
+Route::post('/store', [PeriodeController::class, 'store']);
+Route::post('/ajax', [PeriodeController::class, 'store_ajax']);
 });
 });

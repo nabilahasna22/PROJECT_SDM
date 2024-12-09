@@ -80,6 +80,7 @@
                 <th>No</th>
                 <th>Nama Kegiatan</th>
                 <th>Deskripsi</th>
+                <th>Periode</th>
                 <th>Tanggal Mulai</th>
                 <th>Tanggal Selesai</th>
                 <th>Status</th>
@@ -93,6 +94,7 @@
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $k->kegiatan_nama }}</td>
                 <td>{{ $k->deskripsi }}</td>
+                <td>{{ \Carbon\Carbon::parse($k->periode->tahun)->format('Y') }}</td>
                 <td>{{ \Carbon\Carbon::parse($k->tanggal_mulai)->format('d-m-Y') }}</td>
                 <td>{{ \Carbon\Carbon::parse($k->tanggal_selesai)->format('d-m-Y') }}</td>
                 <td>{{ $k->status }}</td>

@@ -80,7 +80,12 @@
                     <p>Kategori Kegiatan</p>
                 </a>
             </li>
-
+            <li class="nav-item">
+                <a href="{{ url('/periode') }}" class="nav-link {{ $activeMenu == 'periode' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-list"></i>
+                    <p>Periode Kegiatan</p>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ url('/kegiatan') }}" class="nav-link {{ $activeMenu == 'kegiatan' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-calendar-alt"></i>

@@ -53,6 +53,18 @@
                     <small id="error-id_wilayah" class="text-danger"></small>
                 </div>
 
+                <!-- Periode -->
+                <div class="form-group">
+                    <label>Periode</label>
+                    <select name="periode_id" id="periode_id" class="form-control" required>
+                        <option value="">- Pilih Periode -</option>
+                        @foreach ($periode as $p)
+                            <option {{ $p->periode_id == $kegiatan->periode_id ? 'selected' : '' }} value="{{ $p->periode_id }}">{{ $p->tahun }}</option>
+                        @endforeach
+                    </select>
+                    <small id="error-periode_id" class="text-danger"></small>
+                </div>
+
                 <!-- Nama Kegiatan -->
                 <div class="form-group">
                     <label>Nama Kegiatan</label>
@@ -116,6 +128,7 @@
             rules: {
                 kategori_id: { required: true, number: true },
                 id_wilayah: { required: true, number: true },
+                periode_id: { required: true, number: true }, // Add rule for periode_id
                 kegiatan_nama: { required: true, minlength: 3, maxlength: 100 },
                 deskripsi: { maxlength: 255 },
                 tanggal_mulai: { required: true, date: true },
@@ -123,10 +136,10 @@
                 status: { required: true }
             },
             submitHandler: function(form) {
-            form.preventDefault();
+                form.preventDefault();
                 $.ajax({
                     url: form.action,
-                    type: 'form.method,'
+                    type: form.method,
                     data: $(form).serialize(),
                     success: function(response) {
                         if (response.status) {                            
@@ -152,16 +165,16 @@
                 });
                 return false;
             },
-                    errorElement: 'span',
-                    errorPlacement: function(error, element) {
-                        error.addClass('invalid-feedback');
-                        element.closest('.form-group').append(error);
-                    },
-                    highlight: function(element, errorClass, validClass) {
-                        $(element).addClass('is-invalid');
-                    },
-                    unhighlight: function(element, errorClass, validClass) {
-                        $(element).removeClass('is-invalid');
+            errorElement: 'span',
+            errorPlacement: function(error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
             }
         });
     });

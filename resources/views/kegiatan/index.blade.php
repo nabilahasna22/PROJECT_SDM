@@ -35,6 +35,15 @@
                                 </select>
                                 <small class="form-text text-muted">Wilayah</small>
                             </div>
+                            <div class="col-md-3">
+                                <select name="filter_periode" class="form-control formcontrol-sm filter_periode">
+                                    <option value="">- Semua Periode -</option>
+                                    @foreach ($periode as $p)
+                                        <option value="{{ $p->periode_id }}">{{ $p->tahun }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Periode</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -51,6 +60,7 @@
                         <th>No</th>
                         <th>Nama Kegiatan</th>
                         <th>Deskripsi</th>
+                        <th>Periode</th>
                         <th>Tanggal Mulai</th>
                         <th>Tanggal Selesai</th>
                         <th>Status</th>
@@ -86,6 +96,7 @@
                     "data": function(d) {
                         d.filter_kategori = $('.filter_kategori').val();
                         d.filter_wilayah = $('.filter_wilayah').val(); // Filter untuk wilayah
+                        d.filter_periode = $('.filter_periode').val();
                     }
                 },
                 columns: [{
@@ -105,6 +116,15 @@
                     orderable: true,
                     searchable: true,
                 }, {
+                    data: "periode.tahun",
+                    className: "",
+                    orderable: true,
+                    searchable: false,
+                    render: function(data) {
+                        return new Date(data).getFullYear();
+                    }
+                },
+                {
                     data: "tanggal_mulai",
                     className: "",
                     orderable: true,
@@ -148,6 +168,9 @@
                 }
             });
             $('.filter_kategori, .filter_wilayah').change(function() {
+                tableKegiatan.draw();
+            });
+            $('.filter_periode, .filter_periode').change(function() {
                 tableKegiatan.draw();
             });
         });

@@ -21,6 +21,17 @@
                     <small id="error-kategori_id" class="text-danger"></small>
                 </div>
                 
+                <!-- Periode -->
+                <div class="form-group">
+                    <label>Periode Kegiatan</label>
+                    <select name="periode_id" id="periode_id" class="form-control" required>
+                        <option value="">- Pilih Periode -</option>
+                        @foreach ($periode as $l)
+                            <option value="{{ $l->periode_id }}">{{ $l->tahun }}</option>
+                        @endforeach
+                    </select>
+                    <small id="error-kategori_id" class="text-danger"></small>
+                </div>
                 <!-- Wilayah -->
                 <div class="form-group">
                     <label>Wilayah</label>
@@ -95,6 +106,7 @@
             rules: {
                 kategori_id: { required: true, number: true },
                 id_wilayah: { required: true, number: true },
+                periode_id: { required: true, number: true },
                 kegiatan_nama: { required: true, minlength: 3, maxlength: 100 },
                 deskripsi: { maxlength: 255 },
                 tanggal_mulai: { required: true, date: true },

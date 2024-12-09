@@ -47,6 +47,10 @@
                             <td class="col-9">{{ $kegiatan->deskripsi }}</td>
                         </tr>
                         <tr>
+                            <th class="text-right col-3">Periode:</th>
+                            <td class="col-9">{{ $kegiatan->periode->tahun }}</td>
+                        </tr>
+                        <tr>
                             <th class="text-right col-3">Tanggal Mulai:</th>
                             <td class="col-9">{{ $kegiatan->tanggal_mulai }}</td>
                         </tr>

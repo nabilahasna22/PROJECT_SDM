@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KegiatanModel;
 use App\Models\KategoriModel;
+use App\Models\PeriodeModel;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -24,21 +25,23 @@ class KegiatanController extends Controller
     // Mengambil data kategori dan wilayah
     $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
     $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
+    $periode = PeriodeModel::select('periode_id', 'tahun')->get();
 
     // Mengirim semua data ke view
     return view('kegiatan.index', [
         'activeMenu'  => $activeMenu,
         'breadcrumb'  => $breadcrumb,
         'kategori'    => $kategori,
-        'wilayah'     => $wilayah
+        'wilayah'     => $wilayah,
+        'periode'     => $periode
     ]);
     }
 
 
     public function list(Request $request)
     {
-        $kegiatan = KegiatanModel::select('kategori_id', 'kegiatan_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah')
-            ->with(['kategori', 'wilayah']); // Tambahkan relasi 'wilayah'
+        $kegiatan = KegiatanModel::select('kategori_id', 'kegiatan_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah', 'periode_id')
+            ->with(['kategori', 'wilayah', 'periode']); 
     
         $kategori_id = $request->input('filter_kategori');
         if (!empty($kategori_id)) {
@@ -48,6 +51,10 @@ class KegiatanController extends Controller
         if (!empty($id_wilayah)) {
             $kegiatan->where('id_wilayah', $id_wilayah);
         }
+        $periode_id = $request->input('filter_periode');
+        if (!empty($periode_id)) {
+            $kegiatan->where('periode_id', $periode_id);
+        }
     
         return DataTables::of($kegiatan)
             ->addIndexColumn()
@@ -55,6 +62,7 @@ class KegiatanController extends Controller
                 //$btn = '<a href="' . url('/kegiatan/' . $kegiatan->kegiatan_id) . '" class="btn btn-info btn-sm">Detail</a> ';
                 $btn = '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button>';
                 $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button>';
+                $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 return $btn;
             })
@@ -67,9 +75,11 @@ class KegiatanController extends Controller
     {
         $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
         $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
+        $periode = PeriodeModel::select('periode_id', 'tahun')->get();
         return view('kegiatan.create_ajax', [
             'kategori' => $kategori,
-            'wilayah' => $wilayah
+            'wilayah' => $wilayah,
+            'periode' => $periode
         ]);
     }
 
@@ -78,11 +88,13 @@ class KegiatanController extends Controller
         $kegiatan = KegiatanModel::find($id); // Cari data kegiatan berdasarkan ID
         $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get(); // Ambil data kategori
         $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get(); // Ambil data wilayah
+        $periode = PeriodeModel::select('periode_id', 'tahun')->get();
     
         return view('kegiatan.edit_ajax', [
             'kegiatan' => $kegiatan,
             'kategori' => $kategori,
-            'wilayah' => $wilayah
+            'wilayah' => $wilayah,
+            'periode' => $periode
         ]);
     }
     
@@ -91,12 +103,13 @@ class KegiatanController extends Controller
     // Validasi request
     $rules = [
         'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
-        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
+        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',  // Add validation for periode_id
         'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
         'deskripsi'        => 'nullable|string|max:500',
         'tanggal_mulai'    => 'sometimes|date',
         'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
-        'status'           => 'sometimes|string|in:on progres,terlaksana',
+        'status'           => 'sometimes|string|in:on progres,terlaksana',        
+        'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
     ];
 
     $validator = Validator::make($request->all(), $rules);
@@ -120,6 +133,7 @@ class KegiatanController extends Controller
             'tanggal_mulai'    => $request->tanggal_mulai ?? $kegiatan->tanggal_mulai,
             'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
             'status'           => $request->status ?? $kegiatan->status,
+            'periode_id'       => $request->periode_id ?? $kegiatan->periode_id,
         ]);
         return redirect('/kegiatan'); 
     }
@@ -142,6 +156,7 @@ public function store_ajax(Request $request)
         'tanggal_mulai'    => 'sometimes|date',
         'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
         'status'           => 'sometimes|string|in:on progres,terlaksana',
+        'periode_id'       => 'required|exists:periode_kegiatan,periode_id',  // Add validation for periode_id
     ];
 
     $validator = Validator::make($request->all(), $rules);
@@ -158,6 +173,7 @@ public function store_ajax(Request $request)
 
     return redirect('/kegiatan'); 
 }
+
 
     public function show(string $id)
     {
@@ -210,122 +226,128 @@ public function store_ajax(Request $request)
     {
         return view('kegiatan.import');
     }
+    
     public function import_ajax(Request $request)
-{
-    $rules = [
-        'file_kegiatan' => ['required', 'mimes:xlsx', 'max:1024'],
-    ];
-
-    $validator = Validator::make($request->all(), $rules);
-    if ($validator->fails()) {
-        return response()->json([
-            'status'   => false,
-            'message'  => 'Validasi Gagal',
-            'msgField' => $validator->errors()
-        ]);
-    }
-
-    $file = $request->file('file_kegiatan');
-    $reader = IOFactory::createReader('Xlsx');
-    $reader->setReadDataOnly(true);
-    $spreadsheet = $reader->load($file->getRealPath());
-    $sheet = $spreadsheet->getActiveSheet();
-    $data = $sheet->toArray(null, false, true, true);
-
-    $insert = [];
-    if (count($data) > 1) {
-        foreach ($data as $baris => $value) {
-            if ($baris > 1) {
-                $insert[] = [
-                    'kategori_id'      => $value['A'],
-                    'id_wilayah'       => $value['B'], // Menambahkan id_wilayah
-                    'kegiatan_nama'    => $value['C'],
-                    'deskripsi'        => $value['D'],
-                    'tanggal_mulai'    => $value['E'],
-                    'tanggal_selesai'  => $value['F'],
-                    'status'           => $value['G'],
-                    'created_at'       => now(),
-                ];
+    {
+        $rules = [
+            'file_kegiatan' => ['required', 'mimes:xlsx', 'max:1024'],
+        ];
+    
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'   => false,
+                'message'  => 'Validasi Gagal',
+                'msgField' => $validator->errors()
+            ]);
+        }
+    
+        $file = $request->file('file_kegiatan');
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray(null, false, true, true);
+    
+        $insert = [];
+        if (count($data) > 1) {
+            foreach ($data as $baris => $value) {
+                if ($baris > 1) {
+                    $insert[] = [
+                        'kategori_id'      => $value['A'],
+                        'id_wilayah'       => $value['B'], // Menambahkan id_wilayah
+                        'kegiatan_nama'    => $value['C'],
+                        'deskripsi'        => $value['D'],
+                        'tanggal_mulai'    => $value['E'],
+                        'tanggal_selesai'  => $value['F'],
+                        'status'           => $value['G'],
+                        'periode_id'       => $value['H'], // Menambahkan periode_id
+                        'created_at'       => now(),
+                    ];
+                }
             }
         }
-    }
-
-    if (count($insert) > 0) {
-        KegiatanModel::insertOrIgnore($insert);
-    }
-
-    return redirect('/kegiatan');
-}
-
-
-public function export_excel()
-{
-    // Ambil data kegiatan yang akan di-export
-    $kegiatan = KegiatanModel::select('kategori_id', 'id_wilayah', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status')
-        ->orderBy('kategori_id')
-        ->with('kategori', 'wilayah') // Ambil relasi kategori dan wilayah
-        ->get();
     
-    // Load library excel
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
-    $sheet->setCellValue('A1', 'No');
-    $sheet->setCellValue('B1', 'Kategori Kegiatan');
-    $sheet->setCellValue('C1', 'Wilayah');
-    $sheet->setCellValue('D1', 'Nama Kegiatan');
-    $sheet->setCellValue('E1', 'Deskripsi');
-    $sheet->setCellValue('F1', 'Tanggal Mulai');
-    $sheet->setCellValue('G1', 'Tanggal Selesai');
-    $sheet->setCellValue('H1', 'Status');
-    $sheet->getStyle('A1:H1')->getFont()->setBold(true); // Bold header
+        if (count($insert) > 0) {
+            KegiatanModel::insertOrIgnore($insert);
+        }
     
-    $no = 1; // Nomor data dimulai dari 1
-    $baris = 2; // Baris data dimulai dari baris ke 2
-    foreach ($kegiatan as $key => $value) {
-        $sheet->setCellValue('A' . $baris, $no);
-        $sheet->setCellValue('B' . $baris, $value->kategori->kategori_nama); // Ambil nama kategori
-        $sheet->setCellValue('C' . $baris, $value->wilayah->nama_wilayah); // Ambil nama wilayah
-        $sheet->setCellValue('D' . $baris, $value->kegiatan_nama);
-        $sheet->setCellValue('E' . $baris, $value->deskripsi);
-        $sheet->setCellValue('F' . $baris, $value->tanggal_mulai);
-        $sheet->setCellValue('G' . $baris, $value->tanggal_selesai);
-        $sheet->setCellValue('H' . $baris, $value->status);
-        $baris++;
-        $no++;
-    }
-
-    foreach (range('A', 'H') as $columnID) {
-        $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
+        return redirect('/kegiatan');
     }
     
-    $sheet->setTitle('Data Kegiatan'); // Set title sheet
-    $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-    $filename = 'Data Kegiatan ' . date('Y-m-d H:i:s') . '.xlsx';
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-    header('Cache-Control: max-age=1');
-    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-    header('Last-Modified:' . gmdate('D, d M Y H:i:s') . ' GMT');
-    header('Cache-Control: cache, must-revalidate');
-    header('Pragma: public');
-    $writer->save('php://output');
-    exit;
-} public function export_pdf()
-{
-    $kegiatan = KegiatanModel::select('kategori_id', 'id_wilayah', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status')
-        ->orderBy('kategori_id')
-        ->orderBy('kegiatan_nama')
-        ->with('kategori', 'wilayah') // Ambil relasi kategori dan wilayah
-        ->get();
+    public function export_excel()
+    {
+        // Ambil data kegiatan yang akan di-export
+        $kegiatan = KegiatanModel::select('kategori_id', 'id_wilayah', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'periode_id')
+            ->orderBy('kategori_id')
+            ->with('kategori', 'wilayah') // Ambil relasi kategori dan wilayah
+            ->get();
+        
+        // Load library excel
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kategori Kegiatan');
+        $sheet->setCellValue('C1', 'Wilayah');
+        $sheet->setCellValue('D1', 'Nama Kegiatan');
+        $sheet->setCellValue('E1', 'Deskripsi');
+        $sheet->setCellValue('F1', 'Tanggal Mulai');
+        $sheet->setCellValue('G1', 'Tanggal Selesai');
+        $sheet->setCellValue('H1', 'Status');
+        $sheet->setCellValue('I1', 'Periode'); // Menambahkan header untuk periode_id
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true); // Bold header
+        
+        $no = 1; // Nomor data dimulai dari 1
+        $baris = 2; // Baris data dimulai dari baris ke 2
+        foreach ($kegiatan as $key => $value) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $value->kategori->kategori_nama); // Ambil nama kategori
+            $sheet->setCellValue('C' . $baris, $value->wilayah->nama_wilayah); // Ambil nama wilayah
+            $sheet->setCellValue('D' . $baris, $value->kegiatan_nama);
+            $sheet->setCellValue('E' . $baris, $value->deskripsi);
+            $sheet->setCellValue('F' . $baris, $value->tanggal_mulai);
+            $sheet->setCellValue('G' . $baris, $value->tanggal_selesai);
+            $sheet->setCellValue('H' . $baris, $value->status);
+            $sheet->setCellValue('I' . $baris, $value->periode_id); // Menambahkan periode_id
+            $baris++;
+            $no++;
+        }
     
-    // Generate PDF
-    $pdf = Pdf::loadView('kegiatan.export_pdf', ['kegiatan' => $kegiatan]);
-    $pdf->setPaper('a4', 'portrait'); // Set ukuran kertas dan orientasi
-    $pdf->setOption("isRemoteEnabled", true); // Set true jika ada gambar dari URL
-    return $pdf->stream('Data Kegiatan ' . date('Y-m-d H:i:s') . '.pdf');
-}
- 
+        foreach (range('A', 'I') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
+        }
+        
+        $sheet->setTitle('Data Kegiatan'); // Set title sheet
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data Kegiatan ' . date('Y-m-d H:i:s') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified:' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function export_pdf()
+    {
+        $kegiatan = KegiatanModel::select('kategori_id', 'id_wilayah', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'periode_id')
+            ->orderBy('kategori_id')
+            ->orderBy('kegiatan_nama')
+            ->with('kategori', 'wilayah') // Ambil relasi kategori dan wilayah
+            ->get();
+        
+        // Generate PDF
+        $pdf = Pdf::loadView('kegiatan.export_pdf', ['kegiatan' => $kegiatan]);
+        $pdf->setPaper('a4', 'portrait'); // Set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true); // Set true jika ada gambar dari URL
+        return $pdf->stream('Data Kegiatan ' . date('Y-m-d H:i:s') . '.pdf');
+    }
+    
+
     
 }
  

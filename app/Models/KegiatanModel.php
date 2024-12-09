@@ -12,7 +12,7 @@ class KegiatanModel extends Model
 
     protected $table = 'kegiatan'; // Nama tabel yang digunakan
     protected $primaryKey = 'kegiatan_id'; // Primary key dari tabel ini
-    protected $fillable = ['kategori_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah']; // Menambahkan id_wilayah ke fillable
+    protected $fillable = ['kategori_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah', 'periode_id']; // Menambahkan periode_id ke fillable
 
     /**
      * Relasi ke KategoriModel
@@ -30,6 +30,15 @@ class KegiatanModel extends Model
     public function wilayah(): BelongsTo
     {
         return $this->belongsTo(Wilayah::class, 'id_wilayah', 'id_wilayah');
+    }
+
+    /**
+     * Relasi ke PeriodeModel
+     * Setiap KegiatanModel terkait dengan satu PeriodeModel
+     */
+    public function periode(): BelongsTo
+    {
+        return $this->belongsTo(PeriodeModel::class, 'periode_id', 'periode_id'); // mengacu pada periode_id
     }
 
     public function kegiatan(): HasMany
