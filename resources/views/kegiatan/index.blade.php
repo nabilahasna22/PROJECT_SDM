@@ -144,8 +144,18 @@
                     data: "status",
                     className: "",
                     orderable: true,
-                    searchable: true
-                }, {
+                    searchable: true,
+                    render: function(data) {
+                            switch(data) {
+                                case 'on progres':
+                                    return '<span class="badge badge-warning">On Progres</span>';
+                                case 'terlaksana':
+                                    return '<span class="badge badge-success">Terlaksana</span>';
+                                default:
+                                    return '<span class="badge badge-secondary">Status Tidak Dikenal</span>';
+                            }
+                        }
+                    }, {
                     data: "kategori.kategori_nama",
                     className: "",
                     orderable: true,

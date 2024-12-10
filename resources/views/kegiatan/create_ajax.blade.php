@@ -1,6 +1,6 @@
 <form action="{{ url('/kegiatan/ajax') }}" method="POST" id="form-create">
     @csrf
-    <div id="modal-master" class="modal-dialog modal-lg" role="document">
+    <div id="myModal" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Tambah Data Kegiatan</h5>
@@ -99,7 +99,6 @@
         </div>
     </div>
 </form>
-
 <script>
     $(document).ready(function () {
         $("#form-create").validate({

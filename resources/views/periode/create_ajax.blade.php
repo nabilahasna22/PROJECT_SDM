@@ -1,6 +1,6 @@
-<form action="{{ url('/periode/store') }}" method="POST" id="form-tambah">
+<form action="{{ url('/periode/ajax') }}" method="POST" id="form-tambah">
     @csrf
-    <div id="modal-master" class="modal-dialog modal-lg" role="document">
+    <div id="myModal" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Tambah Periode</h5>
@@ -51,7 +51,7 @@
                     data: $(form).serialize(),
                     success: function(response) {
                         if (response.status) {
-                            $('#modal-master').modal('hide'); // Sembunyikan modal
+                            $('#myModal').modal('hide'); // Sembunyikan modal
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil',

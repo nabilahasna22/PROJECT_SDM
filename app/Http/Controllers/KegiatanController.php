@@ -63,7 +63,6 @@ class KegiatanController extends Controller
                 $btn = '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button>';
                 $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button>';
                 $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
-                $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -103,7 +102,7 @@ class KegiatanController extends Controller
     // Validasi request
     $rules = [
         'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
-        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',  // Add validation for periode_id
+        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
         'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
         'deskripsi'        => 'nullable|string|max:500',
         'tanggal_mulai'    => 'sometimes|date',
@@ -118,45 +117,49 @@ class KegiatanController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'Validasi gagal.',
-            'msgField' => $validator->errors(),
-        ]);
+            'errors' => $validator->errors()
+        ], 422);
     }
 
     $kegiatan = KegiatanModel::find($id);
 
-    if ($kegiatan) {
-        $kegiatan->update([
-            'kategori_id'      => $request->kategori_id ?? $kegiatan->kategori_id,
-            'id_wilayah'       => $request->id_wilayah ?? $kegiatan->id_wilayah,
-            'kegiatan_nama'    => $request->kegiatan_nama ?? $kegiatan->kegiatan_nama,
-            'deskripsi'        => $request->deskripsi ?? $kegiatan->deskripsi,
-            'tanggal_mulai'    => $request->tanggal_mulai ?? $kegiatan->tanggal_mulai,
-            'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
-            'status'           => $request->status ?? $kegiatan->status,
-            'periode_id'       => $request->periode_id ?? $kegiatan->periode_id,
-        ]);
-        return redirect('/kegiatan'); 
+    if (!$kegiatan) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Data kegiatan tidak ditemukan'
+        ], 404);
     }
 
+    $kegiatan->update([
+        'kategori_id'      => $request->kategori_id ?? $kegiatan->kategori_id,
+        'id_wilayah'       => $request->id_wilayah ?? $kegiatan->id_wilayah,
+        'kegiatan_nama'    => $request->kegiatan_nama ?? $kegiatan->kegiatan_nama,
+        'deskripsi'        => $request->deskripsi ?? $kegiatan->deskripsi,
+        'tanggal_mulai'    => $request->tanggal_mulai ?? $kegiatan->tanggal_mulai,
+        'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
+        'status'           => $request->status ?? $kegiatan->status,
+        'periode_id'       => $request->periode_id ?? $kegiatan->periode_id,
+    ]);
+
     return response()->json([
-        'status' => false,
-        'message' => 'Data kegiatan tidak ditemukan',
+        'status' => true,
+        'message' => 'Data kegiatan berhasil diperbarui',
+        'data' => $kegiatan
     ]);
 }
 
-    
 public function store_ajax(Request $request)
 {
     // Validasi data yang diterima dari request
     $rules = [
-        'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
-        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
-        'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
+        'kategori_id'      => 'required|exists:kategori,kategori_id',
+        'id_wilayah'       => 'required|exists:wilayah_kegiatan,id_wilayah',
+        'kegiatan_nama'    => 'required|string|min:3|max:100',
         'deskripsi'        => 'nullable|string|max:500',
-        'tanggal_mulai'    => 'sometimes|date',
-        'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
-        'status'           => 'sometimes|string|in:on progres,terlaksana',
-        'periode_id'       => 'required|exists:periode_kegiatan,periode_id',  // Add validation for periode_id
+        'tanggal_mulai'    => 'required|date',
+        'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+        'status'           => 'required|string|in:on progres,terlaksana',
+        'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
     ];
 
     $validator = Validator::make($request->all(), $rules);
@@ -165,15 +168,52 @@ public function store_ajax(Request $request)
         return response()->json([
             'status'   => false,
             'message'  => 'Validasi Gagal',
-            'msgField' => $validator->errors()
-        ]);
+            'errors' => $validator->errors()
+        ], 422);
     }
 
-    KegiatanModel::create($request->all());
+    try {
+        $kegiatan = KegiatanModel::create($request->all());
 
-    return redirect('/kegiatan'); 
+        return response()->json([
+            'status' => true,
+            'message' => 'Data kegiatan berhasil disimpan',
+            'data' => $kegiatan
+        ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Gagal menyimpan data kegiatan',
+            'error' => $e->getMessage()
+        ], 500);
+    }
 }
 
+public function delete_ajax($id)
+{
+    $kegiatan = KegiatanModel::find($id);
+    
+    if (!$kegiatan) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Data kegiatan tidak ditemukan'
+        ], 404);
+    }
+
+    try {
+        $kegiatan->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Data kegiatan berhasil dihapus'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Gagal menghapus data kegiatan',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
     public function show(string $id)
     {
@@ -204,22 +244,6 @@ public function store_ajax(Request $request)
     {
         $kegiatan = KegiatanModel::find($id);
         return view('kegiatan.confirm_ajax', ['kegiatan' => $kegiatan]);
-    }
-
-    public function delete_ajax(Request $request, $id)
-    {
-            $kegiatan = KegiatanModel::find($id);
-            if ($kegiatan) {
-                $kegiatan->delete();
-                return redirect('/kegiatan');
-            } else {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Data kegiatan tidak ditemukan'
-                ]);
-            }
-        
-        return redirect('/');
     }
 
     public function import()
