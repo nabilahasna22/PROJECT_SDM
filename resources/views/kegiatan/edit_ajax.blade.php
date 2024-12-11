@@ -29,6 +29,9 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-warning">
+                    <h5><i class="icon fas fa-edit"></i> Edit Informasi Kegiatan</h5>
+                </div>
                 <!-- Kategori Kegiatan -->
                 <div class="form-group">
                     <label>Kategori Kegiatan</label>

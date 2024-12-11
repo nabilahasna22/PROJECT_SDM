@@ -86,6 +86,10 @@ Route::group(['prefix' => 'kegiatan'], function () {
     //Route::get('/{id}', [KegiatanController::class, 'show']);       // menampilkan detail level
     Route::get('/{id}/show_ajax', [KegiatanController::class, 'show_ajax']);  // menampilkan halaman form edit level
     Route::delete('/{id}', [KegiatanController::class, 'destroy']); // menghapus data level
+    Route::get('/kegiatan/{kegiatan_id}/upload-surat', [KegiatanController::class, 'upload_surat'])->name('kegiatan.upload_surat');
+    Route::post('/kegiatan/{kegiatan_id}/store-surat', [KegiatanController::class, 'store_surat'])->name('kegiatan.store_surat');
+    Route::get('/download-surat-tugas/{kegiatan_id}', [KegiatanController::class, 'downloadSuratTugas'])->name('download.surat_tugas');
+    Route::delete('/delete-surat-tugas/{kegiatan_id}', [KegiatanController::class, 'deleteSuratTugas'])->name('delete.surat_tugas');
 });
 Route::group(['prefix' => 'daftar_kegiatan'], function () {
     Route::get('/', [DaftarKegiatanController::class, 'index']);          // menampilkan halaman awal level

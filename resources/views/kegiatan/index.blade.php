@@ -4,10 +4,10 @@
         <div class="card-header">
             <h3 class="card-title">Kelola Kegiatan</h3>
             <div class="card-tools">
-                <button onclick="modalAction('{{ url('/kegiatan/import') }}')" class="btn btn-info">Import Data</button>
-                <a href="{{ url('/kegiatan/export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i> Export Excel</a>
-                <a href="{{ url('/kegiatan/export_pdf') }}" class="btn btn-warning"><i class="fa fa-file-pdf"></i> Export PDF</a>
-                <button onclick="modalAction('{{ url('/kegiatan/create_ajax') }}')" class="btn btn-success">Tambah Data</button>
+                <button onclick="modalAction('{{ url('/kegiatan/import_ajax') }}')" class="btn btn-info"><i class="fas fa-file-upload"></i> Import Data</button>
+                <a href="{{ url('/kegiatan/export_excel') }}" class="btn btn-primary"><i class="fas fa-file-excel"></i> Export Excel</a>
+                <a href="{{ url('/kegiatan/export_pdf') }}" class="btn btn-warning"><i class="fas fa-file-pdf"></i> Export PDF</a>
+                <button onclick="modalAction('{{ url('/kegiatan/create_ajax') }}')" class="btn btn-success"><i class="fas fa-plus"></i> Tambah Data</button>
             </div>
         </div>
         <div class="card-body">
@@ -63,9 +63,10 @@
                         <th>Periode</th>
                         <th>Tanggal Mulai</th>
                         <th>Tanggal Selesai</th>
-                        <th>Status</th>
                         <th>Kategori</th>
                         <th>Wilayah</th> <!-- Tambahkan kolom Wilayah -->
+                        <th>Status</th>
+                        <th>Surat Tugas</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -141,6 +142,16 @@
                         return new Date(data).toLocaleDateString('id-ID');
                     }
                 }, {
+                    data: "kategori.kategori_nama",
+                    className: "",
+                    orderable: true,
+                    searchable: false
+                }, {
+                    data: "wilayah.nama_wilayah", // Menampilkan wilayah
+                    className: "",
+                    orderable: true,
+                    searchable: false
+                }, {
                     data: "status",
                     className: "",
                     orderable: true,
@@ -155,17 +166,12 @@
                                     return '<span class="badge badge-secondary">Status Tidak Dikenal</span>';
                             }
                         }
-                    }, {
-                    data: "kategori.kategori_nama",
-                    className: "",
-                    orderable: true,
+                }, {data: "surat_tugas",
+                    className: "text-center",
+                    orderable: false,
                     searchable: false
-                }, {
-                    data: "wilayah.nama_wilayah", // Menampilkan wilayah
-                    className: "",
-                    orderable: true,
-                    searchable: false
-                }, {
+                },
+                {
                     data: "aksi",
                     className: "text-center",
                     orderable: false,

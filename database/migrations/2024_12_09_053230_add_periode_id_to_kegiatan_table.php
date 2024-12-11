@@ -38,4 +38,4 @@ return new class extends Migration
             $table->dropColumn('periode_id');
         });
     }
-}
+};

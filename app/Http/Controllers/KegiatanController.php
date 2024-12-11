@@ -8,6 +8,7 @@ use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
@@ -57,18 +58,132 @@ class KegiatanController extends Controller
         }
     
         return DataTables::of($kegiatan)
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($kegiatan) {
-                //$btn = '<a href="' . url('/kegiatan/' . $kegiatan->kegiatan_id) . '" class="btn btn-info btn-sm">Detail</a> ';
-                $btn = '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button>';
-                $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button>';
-                $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
-                return $btn;
-            })
-            ->rawColumns(['aksi'])
-            ->make(true);
+        ->addIndexColumn()
+        ->addColumn('surat_tugas', function ($kegiatan) {
+            if ($kegiatan->surat_tugas) {
+                return '
+                    <a href="' . route('download.surat_tugas', $kegiatan->kegiatan_id) . '" class="btn btn-primary btn-sm" title="Download Surat Tugas">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button onclick="hapusSuratTugas(' . $kegiatan->kegiatan_id . ')" class="btn btn-danger btn-sm" title="Hapus Surat Tugas">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ';
+            } else {
+                return '<a href="' . route('kegiatan.upload_surat', $kegiatan->kegiatan_id) . '" class="btn btn-success btn-sm" title="Upload Surat Tugas">
+                    <i class="fas fa-upload"></i> Upload
+                </a>';
+            }
+        })
+        ->addColumn('aksi', function ($kegiatan) {
+            $btn = '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/show_ajax').'\')" class="btn btn-info btn-sm" title="Detail"><i class="fas fa-bars"></i></button>';
+            $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></button>';
+            $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>';
+            return $btn;
+        })
+        ->rawColumns(['surat_tugas', 'aksi'])
+        ->make(true);
+}
+public function upload_surat($kegiatan_id)
+{
+    $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
+    return view('kegiatan.upload_surat', compact('kegiatan'));
+}
+
+public function store_surat(Request $request, $kegiatan_id)
+{
+    $request->validate([
+        'surat_tugas' => 'required|file|mimes:pdf,doc,docx|max:5120'
+    ]);
+
+    try {
+        $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
+        
+        // Hapus file lama jika sudah ada
+        if ($kegiatan->surat_tugas) {
+            Storage::delete('surat_tugas/' . $kegiatan->surat_tugas);
+        }
+
+        // Upload file baru
+        $file = $request->file('surat_tugas');
+        $filename = $kegiatan->kegiatan_id . '_surat_tugas_' . time() . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('surat_tugas', $filename);
+
+        // Update data kegiatan
+        $kegiatan->update([
+            'surat_tugas' => $filename
+        ]);
+
+        return redirect()->route('kegiatan.index')
+            ->with('success', 'Surat tugas berhasil diupload');
+    } catch (\Exception $e) {
+        return back()->with('error', 'Gagal upload surat tugas: ' . $e->getMessage());
     }
-    
+}
+
+// Method untuk download surat tugas
+public function downloadSuratTugas($kegiatan_id)
+{
+    try {
+        $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
+
+        if (!$kegiatan->surat_tugas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Surat tugas tidak ditemukan'
+            ], 404);
+        }
+
+        $path = storage_path('app/surat_tugas/' . $kegiatan->surat_tugas);
+
+        if (!file_exists($path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->download($path, $kegiatan->surat_tugas);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal download surat tugas: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+// Method untuk hapus surat tugas
+public function deleteSuratTugas($kegiatan_id)
+{
+    try {
+        $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
+
+        if (!$kegiatan->surat_tugas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada surat tugas untuk dihapus'
+            ], 404);
+        }
+
+        // Hapus file dari storage
+        Storage::delete('surat_tugas/' . $kegiatan->surat_tugas);
+
+        // Update data kegiatan
+        $kegiatan->update([
+            'surat_tugas' => null
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Surat tugas berhasil dihapus'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus surat tugas: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     public function create_ajax()
     {

@@ -12,7 +12,7 @@ class KegiatanModel extends Model
 
     protected $table = 'kegiatan'; // Nama tabel yang digunakan
     protected $primaryKey = 'kegiatan_id'; // Primary key dari tabel ini
-    protected $fillable = ['kategori_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah', 'periode_id']; // Menambahkan periode_id ke fillable
+    protected $fillable = ['kategori_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah', 'periode_id','surat_tugas']; // Menambahkan periode_id ke fillable
 
     /**
      * Relasi ke KategoriModel
