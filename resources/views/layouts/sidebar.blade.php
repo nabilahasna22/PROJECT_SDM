@@ -139,6 +139,12 @@
                         <p>Manajemen Agenda</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ url('/agenda_progres') }}" class="nav-link {{ $activeMenu == 'agenda_progres' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-calendar-check"></i>
+                        <p>Update Progress Agenda</p>
+                    </a>
+                </li>
             @endif
 
             <!-- Pimpinan: Akses semua menu kecuali Manajemen Pengguna dan Kategori Kegiatan -->

@@ -15,7 +15,7 @@
             </div>
         </div>
     @else
-        <form action="{{ url('/profile/' . session('user_id') . '/update_foto') }}" method="POST" id="form-edit"
+        <form action="{{ url('/profile/' . session('nip') . '/update_foto') }}" method="POST" id="form-edit"
             enctype="multipart/form-data">
             @csrf
             @method('PUT')

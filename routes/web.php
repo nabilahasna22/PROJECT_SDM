@@ -12,6 +12,7 @@ use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\ProgresController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
+use App\Http\Controllers\AgendaProgresController;
 use Database\Seeders\KegiatanSeeder;
 
 /*
@@ -37,14 +38,29 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/', [WelcomeController::class, 'index']);
 
 Route::group(['prefix' => 'user'], function () {
-    Route::get('/', [UserController::class, 'index']);          // menampilkan halaman awal user
-    Route::post('/list', [UserController::class, 'list']);      // menampilkan data user dalam bentuk json untuk datatables
-    Route::get('/create', [UserController::class, 'create']);   // menampilkan halaman form tambah user
-    Route::post('/', [UserController::class, 'store']);         // menyimpan data user baru
-    Route::get('/{id}', [UserController::class, 'show']);       // menampilkan detail user
-    Route::get('/{id}/edit', [UserController::class, 'edit']);  // menampilkan halaman form edit user
-    Route::put('/{id}', [UserController::class, 'update']);     // menyimpan perubahan data user
-    Route::delete('/{id}', [UserController::class, 'destroy']); // menghapus data user
+    Route::get('/', [UserController::class, 'index']);
+    Route::post('/list', [UserController::class, 'list']);
+    Route::get('/create', [UserController::class, 'create']);
+    Route::post('/', [UserController::class, 'store']);
+    
+    // AJAX Routes
+    Route::get('/create_ajax', [UserController::class, 'create_ajax']);
+    Route::post('/store_ajax', [UserController::class, 'store_ajax']);
+    Route::get('/{nip}/show_ajax', [UserController::class, 'show_ajax']);
+    Route::get('/{nip}/edit_ajax', [UserController::class, 'edit_ajax']);
+    Route::put('/{nip}/update_ajax', [UserController::class, 'update_ajax']);
+    Route::get('/{nip}/delete_ajax', [UserController::class, 'confirm_ajax']);
+    Route::delete('/{nip}/delete_ajax', [UserController::class, 'delete_ajax']);
+    Route::get('/import', [UserController::class, 'import']); //ajax form upload excel
+    Route::post('/import_ajax', [UserController::class, 'import_ajax']); //ajax form upload excel
+    Route::get('/export_excel', [UserController::class, 'export_excel']); //export excel
+    Route::get('/export_pdf', [UserController::class, 'export_pdf']); //export excel
+    
+    // Non-AJAX Routes
+    Route::get('/{nip}', [UserController::class, 'show']);
+    Route::get('/{nip}/edit', [UserController::class, 'edit']);
+    Route::put('/{nip}', [UserController::class, 'update']);
+    Route::delete('/{nip}', [UserController::class, 'destroy']);
 });
 Route::group(['prefix' => 'level'], function () {
     Route::get('/', [LevelController::class, 'index']);          // menampilkan halaman awal level
@@ -105,6 +121,26 @@ Route::group(['prefix' => 'progres'], function () {
     Route::get('/{id}/edit', [ProgresController::class, 'edit']);  // menampilkan halaman form edit level
     Route::put('/{id}', [ProgresController::class, 'update']);     // menyimpan perubahan data level
     Route::delete('/{id}', [ProgresController::class, 'destroy']); // menghapus data level
+});
+Route::prefix('agenda_progres')->group(function () {
+    // Index/List
+    Route::get('/', [AgendaProgresController::class, 'index'])->name('agenda_progres.index');
+    Route::post('/list', [AgendaProgresController::class, 'list'])->name('agenda_progres.list');
+    
+    // Create
+    Route::get('/create', [AgendaProgresController::class, 'create'])->name('agenda_progres.create');
+    Route::get('/create_ajax', [AgendaProgresController::class, 'create_ajax'])->name('agenda_progres.create_ajax');
+    Route::post('/store', [AgendaProgresController::class, 'store'])->name('agenda_progres.store');
+    
+    // Edit
+    Route::get('/edit_ajax/{id}', [AgendaProgresController::class, 'edit_ajax'])->name('agenda_progres.edit_ajax');
+    Route::put('/update/{id}', [AgendaProgresController::class, 'update'])->name('agenda_progres.update');
+    
+    // Delete
+    Route::delete('/delete/{id}', [AgendaProgresController::class, 'delete'])->name('agenda_progres.delete');
+    
+    // Download
+    Route::get('/download/{filename}', [AgendaProgresController::class, 'download'])->name('agenda_progres.download');
 });
 Route::group(['prefix' => 'detailkegiatan'], function () {
     Route::get('/', [DetailKegiatanController::class, 'index']);          // menampilkan halaman awal level
