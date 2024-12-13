@@ -84,106 +84,6 @@ class KegiatanController extends Controller
         ->rawColumns(['surat_tugas', 'aksi'])
         ->make(true);
 }
-public function upload_surat($kegiatan_id)
-{
-    $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
-    return view('kegiatan.upload_surat', compact('kegiatan'));
-}
-
-public function store_surat(Request $request, $kegiatan_id)
-{
-    $request->validate([
-        'surat_tugas' => 'required|file|mimes:pdf,doc,docx|max:5120'
-    ]);
-
-    try {
-        $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
-        
-        // Hapus file lama jika sudah ada
-        if ($kegiatan->surat_tugas) {
-            Storage::delete('surat_tugas/' . $kegiatan->surat_tugas);
-        }
-
-        // Upload file baru
-        $file = $request->file('surat_tugas');
-        $filename = $kegiatan->kegiatan_id . '_surat_tugas_' . time() . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('surat_tugas', $filename);
-
-        // Update data kegiatan
-        $kegiatan->update([
-            'surat_tugas' => $filename
-        ]);
-
-        return redirect()->route('kegiatan.index')
-            ->with('success', 'Surat tugas berhasil diupload');
-    } catch (\Exception $e) {
-        return back()->with('error', 'Gagal upload surat tugas: ' . $e->getMessage());
-    }
-}
-
-// Method untuk download surat tugas
-public function downloadSuratTugas($kegiatan_id)
-{
-    try {
-        $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
-
-        if (!$kegiatan->surat_tugas) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Surat tugas tidak ditemukan'
-            ], 404);
-        }
-
-        $path = storage_path('app/surat_tugas/' . $kegiatan->surat_tugas);
-
-        if (!file_exists($path)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'File tidak ditemukan'
-            ], 404);
-        }
-
-        return response()->download($path, $kegiatan->surat_tugas);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal download surat tugas: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-// Method untuk hapus surat tugas
-public function deleteSuratTugas($kegiatan_id)
-{
-    try {
-        $kegiatan = KegiatanModel::findOrFail($kegiatan_id);
-
-        if (!$kegiatan->surat_tugas) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada surat tugas untuk dihapus'
-            ], 404);
-        }
-
-        // Hapus file dari storage
-        Storage::delete('surat_tugas/' . $kegiatan->surat_tugas);
-
-        // Update data kegiatan
-        $kegiatan->update([
-            'surat_tugas' => null
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Surat tugas berhasil dihapus'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal menghapus surat tugas: ' . $e->getMessage()
-        ], 500);
-    }
-}
 
     public function create_ajax()
     {
@@ -224,10 +124,10 @@ public function deleteSuratTugas($kegiatan_id)
         'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
         'status'           => 'sometimes|string|in:on progres,terlaksana',        
         'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
+        'surat_tugas'      => 'nullable|file|mimes:pdf,doc,docx|max:2048', // contoh batasan file
     ];
-
+    
     $validator = Validator::make($request->all(), $rules);
-
     if ($validator->fails()) {
         return response()->json([
             'status' => false,
@@ -235,16 +135,29 @@ public function deleteSuratTugas($kegiatan_id)
             'errors' => $validator->errors()
         ], 422);
     }
-
+    
     $kegiatan = KegiatanModel::find($id);
-
     if (!$kegiatan) {
         return response()->json([
             'status' => false,
             'message' => 'Data kegiatan tidak ditemukan'
         ], 404);
     }
-
+    
+    // Proses upload surat tugas
+    if ($request->hasFile('surat_tugas')) {
+        $file = $request->file('surat_tugas');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('surat_tugas', $filename, 'public');
+        
+        // Hapus file lama jika ada
+        if ($kegiatan->surat_tugas && Storage::disk('public')->exists($kegiatan->surat_tugas)) {
+            Storage::disk('public')->delete($kegiatan->surat_tugas);
+        }
+        
+        $kegiatan->surat_tugas = $path;
+    }
+    
     $kegiatan->update([
         'kategori_id'      => $request->kategori_id ?? $kegiatan->kategori_id,
         'id_wilayah'       => $request->id_wilayah ?? $kegiatan->id_wilayah,
@@ -254,8 +167,9 @@ public function deleteSuratTugas($kegiatan_id)
         'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
         'status'           => $request->status ?? $kegiatan->status,
         'periode_id'       => $request->periode_id ?? $kegiatan->periode_id,
+        'surat_tugas'      => $kegiatan->surat_tugas, // Tambahkan ini
     ]);
-
+    
     return response()->json([
         'status' => true,
         'message' => 'Data kegiatan berhasil diperbarui',

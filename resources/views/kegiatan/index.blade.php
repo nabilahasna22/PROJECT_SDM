@@ -66,7 +66,6 @@
                         <th>Kategori</th>
                         <th>Wilayah</th> <!-- Tambahkan kolom Wilayah -->
                         <th>Status</th>
-                        <th>Surat Tugas</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -166,10 +165,6 @@
                                     return '<span class="badge badge-secondary">Status Tidak Dikenal</span>';
                             }
                         }
-                }, {data: "surat_tugas",
-                    className: "text-center",
-                    orderable: false,
-                    searchable: false
                 },
                 {
                     data: "aksi",

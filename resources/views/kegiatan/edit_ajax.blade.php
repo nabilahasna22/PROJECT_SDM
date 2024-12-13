@@ -82,6 +82,20 @@
                     <small id="error-deskripsi" class="text-danger"></small>
                 </div>
 
+                <!-- Surat Tugas -->
+                <div class="form-group">
+                    <label>Surat Tugas</label>
+                    @if ($kegiatan->surat_tugas)
+                        <p>
+                            <a href="{{ url('kegiatan/download/' . $kegiatan->surat_tugas) }}" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="fas fa-download"></i> Lihat Dokumen
+                            </a>
+                        </p>
+                    @endif
+                    <input type="file" name="surat_tugas" class="form-control">
+                    <small class="form-text text-muted">Unggah dokumen (PDF/DOC/DOCX).</small>
+                </div>
+
                 <!-- Tanggal Mulai -->
                 <div class="form-group">
                     <label for="tanggal_mulai">Tanggal Mulai</label>
@@ -134,6 +148,10 @@
                 periode_id: { required: true, number: true }, // Add rule for periode_id
                 kegiatan_nama: { required: true, minlength: 3, maxlength: 100 },
                 deskripsi: { maxlength: 255 },
+                surat_tugas: { 
+                accept: "pdf,doc,docx",
+                filesize: 2097152 // 2MB dalam bytes
+                },
                 tanggal_mulai: { required: true, date: true },
                 tanggal_selesai: { required: true, date: true },                
                 status: { required: true }

@@ -21,7 +21,6 @@
                         <th>ID</th>
                         <th>Kode Level</th>
                         <th>Nama Level</th>
-                        <th>Aksi</th>
                     </tr>
                 </thead>
             </table>
@@ -61,12 +60,6 @@
                         className: "",
                         orderable: true,
                         searchable: true
-                    },
-                    {
-                        data: "aksi",
-                        className: "",
-                        orderable: false,
-                        searchable: false
                     }
                 ]
             });
