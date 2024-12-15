@@ -26,6 +26,9 @@ use Database\Seeders\KegiatanSeeder;
 |
 */
 
+Route::get('/', function () {
+    return view('home'); // Pastikan file ini ada di resources/views/home.blade.php
+});
 
 Route::pattern('id', '[0-9]+');
 
@@ -35,7 +38,7 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
 
-Route::get('/', [WelcomeController::class, 'index']);
+    Route::get('/simti', [WelcomeController::class, 'index']); // Hanya bisa diakses jika sudah login
 
 Route::group(['prefix' => 'user'], function () {
     Route::get('/', [UserController::class, 'index']);
