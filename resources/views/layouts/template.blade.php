@@ -19,8 +19,13 @@
     <link rel="stylesheet"
         href="{{ asset('adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.css')}}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
     @stack('css')
     <!-- Digunakan untuk memanggil custom css dari perintah push('css') pada masing-masing view -->
@@ -37,9 +42,16 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             <a href="{{ url('/') }}" class="brand-link">
-                <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo"
-                    class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">SIMTI</span>
+                {{-- <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo"
+                    class="brand-image img-circle elevation-3" style="opacity: .8"> --}} 
+                @if (session()->has('profile_img_path'))
+                    <img src="{{ asset('storage/' . session('profile_img_path')) }}" alt="Foto Profil"
+                        class="brand-image img-circle elevation-3">
+                @else
+                    <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo"
+                        class="brand-image img-circle elevation-3" style="opacity: .8">
+                @endif    
+                <span class="brand-text font-weight-light">PWL - Starter Code</span>
             </a>
 
             <!-- Sidebar -->
@@ -80,6 +92,11 @@
         <script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
         <script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
         <script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.colvis.min.js') }}"></script>
+        <!-- jquery validation -->
+        <script src="{{ asset('adminlte/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
+        <script src="{{ asset('adminlte/plugins/jquery-validation/additional-methods.min.js') }}"></script> 
+        <!--SweetAlert2 -->
+        <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js')  }}"></script>
         <!-- AdminLTE App -->
         <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
         <script>
@@ -93,5 +110,6 @@
         @stack('js')
         <!-- Digunakan untuk memanggil custom js dari perintah push('js') pada masing-masing view-->
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </html>

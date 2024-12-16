@@ -3,9 +3,13 @@ namespace App\Http\Controllers;
 
 use App\Models\KegiatanModel;
 use App\Models\KategoriModel;
+use App\Models\PeriodeModel;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
@@ -23,21 +27,23 @@ class KegiatanController extends Controller
     // Mengambil data kategori dan wilayah
     $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
     $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
+    $periode = PeriodeModel::select('periode_id', 'tahun')->get();
 
     // Mengirim semua data ke view
     return view('kegiatan.index', [
         'activeMenu'  => $activeMenu,
         'breadcrumb'  => $breadcrumb,
         'kategori'    => $kategori,
-        'wilayah'     => $wilayah
+        'wilayah'     => $wilayah,
+        'periode'     => $periode
     ]);
     }
 
 
     public function list(Request $request)
     {
-        $kegiatan = KegiatanModel::select('kategori_id', 'kegiatan_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah')
-            ->with(['kategori', 'wilayah']); // Tambahkan relasi 'wilayah'
+        $kegiatan = KegiatanModel::select('kategori_id', 'kegiatan_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'id_wilayah', 'periode_id')
+            ->with(['kategori', 'wilayah', 'periode']); 
     
         $kategori_id = $request->input('filter_kategori');
         if (!empty($kategori_id)) {
@@ -47,56 +53,199 @@ class KegiatanController extends Controller
         if (!empty($id_wilayah)) {
             $kegiatan->where('id_wilayah', $id_wilayah);
         }
+        $periode_id = $request->input('filter_periode');
+        if (!empty($periode_id)) {
+            $kegiatan->where('periode_id', $periode_id);
+        }
     
         return DataTables::of($kegiatan)
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($kegiatan) {
-                $btn = '<a href="' . url('/kegiatan/' . $kegiatan->kegiatan_id) . '" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button>';
-                $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
-                return $btn;
-            })
-            ->rawColumns(['aksi'])
-            ->make(true);
-    }
-    
+        ->addIndexColumn()
+        ->addColumn('surat_tugas', function ($kegiatan) {
+            if ($kegiatan->surat_tugas) {
+                return '
+                    <a href="' . route('download.surat_tugas', $kegiatan->kegiatan_id) . '" class="btn btn-primary btn-sm" title="Download Surat Tugas">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button onclick="hapusSuratTugas(' . $kegiatan->kegiatan_id . ')" class="btn btn-danger btn-sm" title="Hapus Surat Tugas">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ';
+            } else {
+                return '<a href="' . route('kegiatan.upload_surat', $kegiatan->kegiatan_id) . '" class="btn btn-success btn-sm" title="Upload Surat Tugas">
+                    <i class="fas fa-upload"></i> Upload
+                </a>';
+            }
+        })
+        ->addColumn('aksi', function ($kegiatan) {
+            $btn = '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/show_ajax').'\')" class="btn btn-info btn-sm" title="Detail"><i class="fas fa-bars"></i></button>';
+            $btn .= '<button onclick="modalAction(\''.url('/kegiatan/'. $kegiatan->kegiatan_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></button>';
+            $btn .= '<button onclick="modalAction(\''.url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>';
+            return $btn;
+        })
+        ->rawColumns(['surat_tugas', 'aksi'])
+        ->make(true);
+}
 
     public function create_ajax()
     {
         $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
-        return view('kegiatan.create_ajax')->with('kategori', $kategori);
+        $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
+        $periode = PeriodeModel::select('periode_id', 'tahun')->get();
+        return view('kegiatan.create_ajax', [
+            'kategori' => $kategori,
+            'wilayah' => $wilayah,
+            'periode' => $periode
+        ]);
     }
 
-    public function store_ajax(Request $request)
+    public function edit_ajax(string $id)
     {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'kategori_id'     => ['required', 'integer', 'exists:kategori,kategori_id'],
-                'kegiatan_nama'   => ['required', 'string', 'max:100'],
-                'deskripsi'       => ['nullable', 'string'],
-                'tanggal_mulai'   => ['required', 'date'],
-                'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
-                'status'          => ['required', 'string', 'in:planned,ongoing,completed']
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'   => false,
-                    'message'  => 'Validasi Gagal',
-                    'msgField' => $validator->errors()
-                ]);
-            }
-
-            KegiatanModel::create($request->all());
-            return response()->json([
-                'status'  => true,
-                'message' => 'Data kegiatan berhasil disimpan'
-            ]);
-        }
-        return redirect('/');
+        $kegiatan = KegiatanModel::find($id); // Cari data kegiatan berdasarkan ID
+        $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get(); // Ambil data kategori
+        $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get(); // Ambil data wilayah
+        $periode = PeriodeModel::select('periode_id', 'tahun')->get();
+    
+        return view('kegiatan.edit_ajax', [
+            'kegiatan' => $kegiatan,
+            'kategori' => $kategori,
+            'wilayah' => $wilayah,
+            'periode' => $periode
+        ]);
     }
     
+    public function update_ajax(Request $request, $id)
+{
+    // Validasi request
+    $rules = [
+        'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
+        'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
+        'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
+        'deskripsi'        => 'nullable|string|max:500',
+        'tanggal_mulai'    => 'sometimes|date',
+        'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
+        'status'           => 'sometimes|string|in:on progres,terlaksana',        
+        'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
+        'surat_tugas'      => 'nullable|file|mimes:pdf,doc,docx|max:2048', // contoh batasan file
+    ];
+    
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Validasi gagal.',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+    
+    $kegiatan = KegiatanModel::find($id);
+    if (!$kegiatan) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Data kegiatan tidak ditemukan'
+        ], 404);
+    }
+    
+    // Proses upload surat tugas
+    if ($request->hasFile('surat_tugas')) {
+        // Delete old file if exists
+        if ($kegiatan->surat_tugas) {
+            $oldFilePath = public_path('uploads/dokumen/' . $kegiatan->surat_tugas);
+            if (File::exists($oldFilePath)) {
+                File::delete($oldFilePath);
+            }
+        }
+
+        $file = $request->file('surat_tugas');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('uploads/dokumen'), $filename);
+        $kegiatan->surat_tugas = $filename;
+    }
+    
+    $kegiatan->update([
+        'kategori_id'      => $request->kategori_id ?? $kegiatan->kategori_id,
+        'id_wilayah'       => $request->id_wilayah ?? $kegiatan->id_wilayah,
+        'kegiatan_nama'    => $request->kegiatan_nama ?? $kegiatan->kegiatan_nama,
+        'deskripsi'        => $request->deskripsi ?? $kegiatan->deskripsi,
+        'tanggal_mulai'    => $request->tanggal_mulai ?? $kegiatan->tanggal_mulai,
+        'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
+        'status'           => $request->status ?? $kegiatan->status,
+        'periode_id'       => $request->periode_id ?? $kegiatan->periode_id,
+        'surat_tugas'      => $kegiatan->surat_tugas, // Tambahkan ini
+    ]);
+    
+    return response()->json([
+        'status' => true,
+        'message' => 'Data kegiatan berhasil diperbarui',
+        'data' => $kegiatan
+    ]);
+}
+
+public function store_ajax(Request $request)
+{
+    // Validasi data yang diterima dari request
+    $rules = [
+        'kategori_id'      => 'required|exists:kategori,kategori_id',
+        'id_wilayah'       => 'required|exists:wilayah_kegiatan,id_wilayah',
+        'kegiatan_nama'    => 'required|string|min:3|max:100',
+        'deskripsi'        => 'nullable|string|max:500',
+        'tanggal_mulai'    => 'required|date',
+        'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
+        'status'           => 'required|string|in:on progres,terlaksana',
+        'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status'   => false,
+            'message'  => 'Validasi Gagal',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    try {
+        $kegiatan = KegiatanModel::create($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data kegiatan berhasil disimpan',
+            'data' => $kegiatan
+        ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Gagal menyimpan data kegiatan',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function delete_ajax($id)
+{
+    $kegiatan = KegiatanModel::find($id);
+    
+    if (!$kegiatan) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Data kegiatan tidak ditemukan'
+        ], 404);
+    }
+
+    try {
+        $kegiatan->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Data kegiatan berhasil dihapus'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Gagal menghapus data kegiatan',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
     public function show(string $id)
     {
@@ -106,132 +255,125 @@ class KegiatanController extends Controller
         $activeMenu = 'kegiatan';
         return view('kegiatan.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'kegiatan' => $kegiatan, 'activeMenu' => $activeMenu]);
     }
+
+    public function show_ajax(string $id)
+    {
+        $kegiatan = KegiatanModel::find($id);
+    
+        if (!$kegiatan) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data kegiatan tidak ditemukan'
+            ]);
+        }
+    
+        // Mengembalikan tampilan dengan data kegiatan
+        return view('kegiatan.show_ajax', ['kegiatan' => $kegiatan]);
+    }
+    
+
     public function confirm_ajax($id)
     {
         $kegiatan = KegiatanModel::find($id);
         return view('kegiatan.confirm_ajax', ['kegiatan' => $kegiatan]);
     }
 
-    public function delete_ajax(Request $request, $id)
-    {
-        if ($request->ajax() || $request->wantsJson()) {
-            $kegiatan = KegiatanModel::find($id);
-            if ($kegiatan) {
-                $kegiatan->delete();
-                return response()->json([
-                    'status'  => true,
-                    'message' => 'Data kegiatan berhasil dihapus'
-                ]);
-            } else {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Data kegiatan tidak ditemukan'
-                ]);
-            }
-        }
-        return redirect('/');
-    }
-
     public function import()
     {
         return view('kegiatan.import');
     }
-
+    
     public function import_ajax(Request $request)
     {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'file_kegiatan' => ['required', 'mimes:xlsx', 'max:1024'],
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'   => false,
-                    'message'  => 'Validasi Gagal',
-                    'msgField' => $validator->errors()
-                ]);
-            }
-
-            $file = $request->file('file_kegiatan');
-            $reader = IOFactory::createReader('Xlsx');
-            $reader->setReadDataOnly(true);
-            $spreadsheet = $reader->load($file->getRealPath());
-            $sheet = $spreadsheet->getActiveSheet();
-            $data = $sheet->toArray(null, false, true, true);
-
-            $insert = [];
-            if (count($data) > 1) {
-                foreach ($data as $baris => $value) {
-                    if ($baris > 1) {
-                        $insert[] = [
-                            'kategori_id'     => $value['A'],
-                            'kegiatan_nama'   => $value['B'],
-                            'deskripsi'       => $value['C'],
-                            'tanggal_mulai'   => $value['D'],
-                            'tanggal_selesai' => $value['E'],
-                            'status'          => $value['F'],
-                            'jenis_kegiatan'  => $value['G'],
-                            'created_at'      => now(),
-                        ];
-                    }
-                }
-            }
-
-            if (count($insert) > 0) {
-                KegiatanModel::insertOrIgnore($insert);
-            }
-
+        $rules = [
+            'file_kegiatan' => ['required', 'mimes:xlsx', 'max:1024'],
+        ];
+    
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
             return response()->json([
-                'status'  => true,
-                'message' => 'Data kegiatan berhasil diimport'
-            ]);
-        } else {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Tidak ada data yang diimport'
+                'status'   => false,
+                'message'  => 'Validasi Gagal',
+                'msgField' => $validator->errors()
             ]);
         }
-        return redirect('/');
+    
+        $file = $request->file('file_kegiatan');
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray(null, false, true, true);
+    
+        $insert = [];
+        if (count($data) > 1) {
+            foreach ($data as $baris => $value) {
+                if ($baris > 1) {
+                    $insert[] = [
+                        'kategori_id'      => $value['A'],
+                        'id_wilayah'       => $value['B'], // Menambahkan id_wilayah
+                        'kegiatan_nama'    => $value['C'],
+                        'deskripsi'        => $value['D'],
+                        'tanggal_mulai'    => $value['E'],
+                        'tanggal_selesai'  => $value['F'],
+                        'status'           => $value['G'],
+                        'periode_id'       => $value['H'], // Menambahkan periode_id
+                        'created_at'       => now(),
+                    ];
+                }
+            }
+        }
+    
+        if (count($insert) > 0) {
+            KegiatanModel::insertOrIgnore($insert);
+        }
+    
+        return redirect('/kegiatan');
     }
-
+    
     public function export_excel()
     {
-        // ambil data kegiatan yang akan di-export
-        $kegiatan = KegiatanModel::select('kategori_id', 'kegiatan_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai')
+        // Ambil data kegiatan yang akan di-export
+        $kegiatan = KegiatanModel::select('kategori_id', 'id_wilayah', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'periode_id')
             ->orderBy('kategori_id')
-            ->with('kategori')
+            ->with('kategori', 'wilayah') // Ambil relasi kategori dan wilayah
             ->get();
         
-        // load library excel
+        // Load library excel
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet(); // ambil sheet yang aktif
+        $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
         $sheet->setCellValue('A1', 'No');
-        $sheet->setCellValue('B1', 'Nama Kegiatan');
-        $sheet->setCellValue('C1', 'Deskripsi');
-        $sheet->setCellValue('D1', 'Tanggal Mulai');
-        $sheet->setCellValue('E1', 'Tanggal Selesai');
-        $sheet->setCellValue('F1', 'Kategori');
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true); // bold header
+        $sheet->setCellValue('B1', 'Kategori Kegiatan');
+        $sheet->setCellValue('C1', 'Wilayah');
+        $sheet->setCellValue('D1', 'Nama Kegiatan');
+        $sheet->setCellValue('E1', 'Deskripsi');
+        $sheet->setCellValue('F1', 'Tanggal Mulai');
+        $sheet->setCellValue('G1', 'Tanggal Selesai');
+        $sheet->setCellValue('H1', 'Status');
+        $sheet->setCellValue('I1', 'Periode'); // Menambahkan header untuk periode_id
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true); // Bold header
         
-        $no = 1; // nomor data dimulai dari 1
-        $baris = 2; // baris data dimulai dari baris ke 2
+        $no = 1; // Nomor data dimulai dari 1
+        $baris = 2; // Baris data dimulai dari baris ke 2
         foreach ($kegiatan as $key => $value) {
             $sheet->setCellValue('A' . $baris, $no);
-            $sheet->setCellValue('B' . $baris, $value->kegiatan_nama);
-            $sheet->setCellValue('C' . $baris, $value->deskripsi);
-            $sheet->setCellValue('D' . $baris, $value->tanggal_mulai);
-            $sheet->setCellValue('E' . $baris, $value->tanggal_selesai);
-            $sheet->setCellValue('F' . $baris, $value->kategori->kategori_nama); // ambil nama kategori
+            $sheet->setCellValue('B' . $baris, $value->kategori->kategori_nama); // Ambil nama kategori
+            $sheet->setCellValue('C' . $baris, $value->wilayah->nama_wilayah); // Ambil nama wilayah
+            $sheet->setCellValue('D' . $baris, $value->kegiatan_nama);
+            $sheet->setCellValue('E' . $baris, $value->deskripsi);
+            $sheet->setCellValue('F' . $baris, $value->tanggal_mulai);
+            $sheet->setCellValue('G' . $baris, $value->tanggal_selesai);
+            $sheet->setCellValue('H' . $baris, $value->status);
+            $sheet->setCellValue('I' . $baris, $value->periode_id); // Menambahkan periode_id
             $baris++;
             $no++;
         }
-
-        foreach (range('A', 'F') as $columnID) {
-            $sheet->getColumnDimension($columnID)->setAutoSize(true); // set auto size untuk kolom
+    
+        foreach (range('A', 'I') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
         }
         
-        $sheet->setTitle('Data Kegiatan'); // set title sheet
+        $sheet->setTitle('Data Kegiatan'); // Set title sheet
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $filename = 'Data Kegiatan ' . date('Y-m-d H:i:s') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -248,16 +390,37 @@ class KegiatanController extends Controller
 
     public function export_pdf()
     {
-        $kegiatan = KegiatanModel::select('kategori_id', 'kegiatan_id', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai')
+        $kegiatan = KegiatanModel::select('kategori_id', 'id_wilayah', 'kegiatan_nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai', 'status', 'periode_id')
             ->orderBy('kategori_id')
             ->orderBy('kegiatan_nama')
-            ->with('kategori')
+            ->with('kategori', 'wilayah') // Ambil relasi kategori dan wilayah
             ->get();
+        
         // Generate PDF
         $pdf = Pdf::loadView('kegiatan.export_pdf', ['kegiatan' => $kegiatan]);
-        $pdf->setPaper('a4', 'portrait'); // set ukuran kertas dan orientasi
-        $pdf->setOption("isRemoteEnabled", true); // set true jika ada gambar dari url
+        $pdf->setPaper('a4', 'portrait'); // Set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true); // Set true jika ada gambar dari URL
         return $pdf->stream('Data Kegiatan ' . date('Y-m-d H:i:s') . '.pdf');
     }
+
+    public function download($filename)
+{
+
+        // Ensure the file belongs to the current user
+        $fileExists =KegiatanModel::where('surat_tugas', $filename)->exists();
+
+        if (!$fileExists) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $filePath = public_path('uploads/dokumen/' . $filename);
+        
+        if (File::exists($filePath)) {
+            return response()->download($filePath);
+        }
+
+        abort(404, 'File not found');
+    }
+        
 }
  
