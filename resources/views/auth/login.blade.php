@@ -6,6 +6,8 @@
     <title>Login Pengguna</title>
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Google Font: Michroma -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&display=swap">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <!-- icheck bootstrap -->
@@ -14,10 +16,11 @@
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+    <!-- Custom Style -->
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Tambahkan style untuk logo */
-        
         .login-logo {
             margin-top: 20px; /* Menambahkan jarak di atas logo */
             margin-bottom: 1px;
@@ -27,13 +30,63 @@
             width: 200px; /* Sesuaikan ukuran logo */
             height: auto;
         }
+
+        /* Modern Gradient Style */
+        body {
+            background: linear-gradient(135deg, #FFDA05, #FFC107, #FF9800);
+            background-size: 400% 400%;
+            animation: gradientBG 5s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #FF9800, #FFC107);
+        }
+
+        .card-header a {
+        font-family: 'Michroma', sans-serif; /* Terapkan font Michroma pada header */
+        width: 100px;
+        height: auto;
+        }
+
+        #hover-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 150px;
+            height: 150px;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 80%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: overlay;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body class="hold-transition login-page">
+    <div id="hover-effect"></div>
     <div class="login-box">
         <div class="card card-outline card-primary">
             <div class="login-logo">
-                <img src="{{ asset('image/polinemabg.png') }}" alt="Logo">
+                <img src="{{ asset('image/Jti_polinema.svg.png') }}" alt="Logo">
             </div>
             <div class="card-header text-center"><a href="{{ url('/') }}" class="h1"><b>SIMTI</b></a></div>
             <div class="card-body">
@@ -57,7 +110,7 @@
                             </div>
                         </div>
                         <small id="error-password" class="error-text text-danger"></small>
-                    
+                        
                         <!-- Tombol Tampilkan/Sembunyikan dengan ikon -->
                         <button type="button" id="toggle-password" class="btn btn-link" style="position: absolute; right: 35px; top: 50%; transform: translateY(-50%); display: none;">
                             <i class="fas fa-eye"></i> <!-- Ikon mata untuk menampilkan -->
@@ -78,7 +131,7 @@
                 </form>
             </div>
             <footer class="text-center mt-3">
-                <small>2024 &copy; Sistem Informasi Manajemen SDM TI<small>
+                <small>2024 &copy; Sistem Informasi Manajemen SDM JTI<small>
             </footer>
         </div>
     </div>
@@ -96,6 +149,13 @@
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+            // Hover Effect Follow Mouse
+            document.addEventListener('mousemove', function (e) {
+                const hoverEffect = document.getElementById('hover-effect');
+                hoverEffect.style.top = e.pageY + 'px';
+                hoverEffect.style.left = e.pageX + 'px';
+            });
+
             $('#password').on('input', function() {
             if ($(this).val().length > 0) {
                 $('#toggle-password').show(); // Tampilkan tombol
