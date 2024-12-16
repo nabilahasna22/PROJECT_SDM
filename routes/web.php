@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DaftarkegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\ProgresController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,7 +32,19 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
 
-Route::get('/', [WelcomeController::class, 'index']);
+    Route::get('/', [WelcomeController::class, 'index']); // Rute utama
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::middleware(['auth', 'checkLevel:1'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'pimpinanDashboard']); // Pimpinan
+    });
+    
+    Route::middleware(['auth', 'checkLevel:2'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'dosenDashboard']); // Dosen
+    });
+    
+    Route::middleware(['auth', 'checkLevel:3'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'adminDashboard']); // Admin
+    });    
 
 Route::group(['prefix' => 'user'], function () {
     Route::get('/', [UserController::class, 'index']);          // menampilkan halaman awal user
