@@ -28,6 +28,7 @@
                         <th>NIP</th>
                         <th>Tanggal</th>
                         <th>Deskripsi</th>
+                        <th>File Dokumen</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -86,7 +87,19 @@
                     className: "",
                     orderable: true,
                     searchable: true,
-                }, {
+                }, 
+                {
+                    data: "file_dokumen",
+                    className: "",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data) {
+                        return data ? 
+                            '<a href="{{ url("progres/download") }}/' + data + '" class="btn btn-sm btn-primary"><i class="fa fa-download"></i> Download</a>' : 
+                            'Tidak ada dokumen';
+                        }
+                    },
+                {
                     data: "aksi",
                     className: "text-center",
                     orderable: false,
