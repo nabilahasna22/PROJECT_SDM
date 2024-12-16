@@ -102,13 +102,19 @@
             <li class="nav-item">
                 <a href="{{ url('/detailkegiatan') }}" class="nav-link {{ $activeMenu == 'detailkegiatan' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-book-open"></i>
-                    <p>Detail Kegiatan</p>
+                    <p>Kegiatan Anggota</p>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ url('/statistik_dosen') }}" class="nav-link {{ ($activeMenu == 'statistik_dosen') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-user-tie"></i>
                     <p>Statistik Dosen</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url('/jabatan') }}" class="nav-link {{ ($activeMenu == 'jabatan') ? 'active' : '' }}">
+                    <i class="nav-icon far fa-user"></i>
+                    <p>Manajemen Jabatan</p>
                 </a>
             </li>
             @endif

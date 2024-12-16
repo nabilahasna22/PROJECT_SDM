@@ -71,9 +71,9 @@ class UserController extends Controller
     {
         // Validasi input
         $request->validate([
-            'nip'      => 'required|string|min:3|unique:users,nip', // Validasi untuk kolom nip
+            'nip'      => 'required|string|min:3|unique:user,nip', // Validasi untuk kolom nip
             'nama'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email', // Validasi email untuk kolom email
+            'email'    => 'required|email|unique:user,email', // Validasi email untuk kolom email
             'password' => 'required|min:5',
             'no_telp'  => 'nullable|string|max:20', // Validasi untuk no_telp
             'foto'     => 'nullable|image|max:2048', // Validasi untuk foto (jika ada upload file)
