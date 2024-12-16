@@ -1,4 +1,4 @@
-<form action="{{ url('/kegiatan/ajax') }}" method="POST" id="form-create">
+<form action="{{ url('/kegiatan/ajax') }}" method="POST" id="form-create" enctype="multipart/form-data">
     @csrf
     <div id="myModal" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">

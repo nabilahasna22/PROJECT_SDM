@@ -8,6 +8,7 @@ use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -400,7 +401,27 @@ public function delete_ajax($id)
         return $pdf->stream('Data Kegiatan ' . date('Y-m-d H:i:s') . '.pdf');
     }
     
+    public function download(string $id)
+    {
+        $kegiatan = KegiatanModel::find($id); // Cari data kegiatan berdasarkan ID
+        
+        // Ensure the file belongs to the current user
+        $fileExists = KegiatanModel::where('kegiatan_id', $kegiatan->kegiatan_id)
+            ->where('surat_tugas', $id)
+            ->exists();
 
-    
+        if (!$fileExists) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $filePath = public_path('uploads/dokumen/' . $id);
+        
+        if (File::exists($filePath)) {
+            return response()->download($filePath);
+        }
+
+        abort(404, 'File not found');
+    }
+        
 }
  
