@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DaftarkegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
+use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProgresController;
 
 /*
@@ -91,11 +92,22 @@ Route::group(['prefix' => 'progres'], function () {
 Route::group(['prefix' => 'detailkegiatan'], function () {
     Route::get('/', [DetailKegiatanController::class, 'index']);          // menampilkan halaman awal level
     Route::post('/list', [DetailKegiatanController::class, 'list']);      // menampilkan data level dalam bentuk json untuk datatables
-    Route::get('/create', [DetailKegiatanController::class, 'create']);   // menampilkan halaman form tambah level
-    Route::post('/', [DetailKegiatanController::class, 'store']);         // menyimpan data level baru
-    Route::get('/{id}', [DetailKegiatanController::class, 'show']);       // menampilkan detail level
-    Route::get('/{id}/edit', [DetailKegiatanController::class, 'edit']);  // menampilkan halaman form edit level
+    Route::get('/create', [DetailKegiatanController::class, 'create_ajax']);   // menampilkan halaman form tambah level
+    Route::post('/store', [DetailKegiatanController::class, 'store_ajax']);         // menyimpan data level baru
+    Route::get('/show_ajax/{id}', [DetailKegiatanController::class, 'show_ajax']);       // menampilkan detail level
+    Route::get('/edit/{id}', [DetailKegiatanController::class, 'edit']);  // menampilkan halaman form edit level
     Route::put('/{id}', [DetailKegiatanController::class, 'update']);     // menyimpan perubahan data level
     Route::delete('/{id}', [DetailKegiatanController::class, 'destroy']); // menghapus data level
 });
+Route::group(['prefix' => 'jabatan'], function () {
+    Route::get('/', [JabatanController::class, 'index']);          // menampilkan halaman awal level
+    Route::post('/list', [JabatanController::class, 'list']);      // menampilkan data level dalam bentuk json untuk datatables
+    Route::get('/create', [JabatanController::class, 'create']);   // menampilkan halaman form tambah level
+    Route::post('/', [JabatanController::class, 'store']);         // menyimpan data level baru
+    Route::get('/{id}', [JabatanController::class, 'show']);       // menampilkan detail level
+    Route::get('/{id}/edit', [JabatanController::class, 'edit']);  // menampilkan halaman form edit level
+    Route::put('/{id}', [JabatanController::class, 'update']);     // menyimpan perubahan data level
+    Route::delete('/{id}', [JabatanController::class, 'destroy']); // menghapus data level
+});
+
 });
