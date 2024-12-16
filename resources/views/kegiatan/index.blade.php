@@ -4,10 +4,10 @@
         <div class="card-header">
             <h3 class="card-title">Kelola Kegiatan</h3>
             <div class="card-tools">
-                <button onclick="modalAction('{{ url('/kegiatan/import') }}')" class="btn btn-info">Import Data</button>
-                <a href="{{ url('/kegiatan/export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i> Export Excel</a>
-                <a href="{{ url('/kegiatan/export_pdf') }}" class="btn btn-warning"><i class="fa fa-file-pdf"></i> Export PDF</a>
-                <button onclick="modalAction('{{ url('/kegiatan/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
+                <button onclick="modalAction('{{ url('/kegiatan/import_ajax') }}')" class="btn btn-info"><i class="fas fa-file-upload"></i> Import Data</button>
+                <a href="{{ url('/kegiatan/export_excel') }}" class="btn btn-primary"><i class="fas fa-file-excel"></i> Export Excel</a>
+                <a href="{{ url('/kegiatan/export_pdf') }}" class="btn btn-warning"><i class="fas fa-file-pdf"></i> Export PDF</a>
+                <button onclick="modalAction('{{ url('/kegiatan/create_ajax') }}')" class="btn btn-success"><i class="fas fa-plus"></i> Tambah Data</button>
             </div>
         </div>
         <div class="card-body">
@@ -35,6 +35,15 @@
                                 </select>
                                 <small class="form-text text-muted">Wilayah</small>
                             </div>
+                            <div class="col-md-3">
+                                <select name="filter_periode" class="form-control formcontrol-sm filter_periode">
+                                    <option value="">- Semua Periode -</option>
+                                    @foreach ($periode as $p)
+                                        <option value="{{ $p->periode_id }}">{{ $p->tahun }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Periode</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -51,11 +60,12 @@
                         <th>No</th>
                         <th>Nama Kegiatan</th>
                         <th>Deskripsi</th>
+                        <th>Periode</th>
                         <th>Tanggal Mulai</th>
                         <th>Tanggal Selesai</th>
-                        <th>Status</th>
                         <th>Kategori</th>
                         <th>Wilayah</th> <!-- Tambahkan kolom Wilayah -->
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -86,6 +96,7 @@
                     "data": function(d) {
                         d.filter_kategori = $('.filter_kategori').val();
                         d.filter_wilayah = $('.filter_wilayah').val(); // Filter untuk wilayah
+                        d.filter_periode = $('.filter_periode').val();
                     }
                 },
                 columns: [{
@@ -105,6 +116,15 @@
                     orderable: true,
                     searchable: true,
                 }, {
+                    data: "periode.tahun",
+                    className: "",
+                    orderable: true,
+                    searchable: false,
+                    render: function(data) {
+                        return new Date(data).getFullYear();
+                    }
+                },
+                {
                     data: "tanggal_mulai",
                     className: "",
                     orderable: true,
@@ -121,11 +141,6 @@
                         return new Date(data).toLocaleDateString('id-ID');
                     }
                 }, {
-                    data: "status",
-                    className: "",
-                    orderable: true,
-                    searchable: true
-                }, {
                     data: "kategori.kategori_nama",
                     className: "",
                     orderable: true,
@@ -136,6 +151,22 @@
                     orderable: true,
                     searchable: false
                 }, {
+                    data: "status",
+                    className: "",
+                    orderable: true,
+                    searchable: true,
+                    render: function(data) {
+                            switch(data) {
+                                case 'on progres':
+                                    return '<span class="badge badge-warning">On Progres</span>';
+                                case 'terlaksana':
+                                    return '<span class="badge badge-success">Terlaksana</span>';
+                                default:
+                                    return '<span class="badge badge-secondary">Status Tidak Dikenal</span>';
+                            }
+                        }
+                },
+                {
                     data: "aksi",
                     className: "text-center",
                     orderable: false,
@@ -148,6 +179,9 @@
                 }
             });
             $('.filter_kategori, .filter_wilayah').change(function() {
+                tableKegiatan.draw();
+            });
+            $('.filter_periode, .filter_periode').change(function() {
                 tableKegiatan.draw();
             });
         });
