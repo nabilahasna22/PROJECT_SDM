@@ -147,16 +147,18 @@ class KegiatanController extends Controller
     
     // Proses upload surat tugas
     if ($request->hasFile('surat_tugas')) {
+        // Delete old file if exists
+        if ($kegiatan->surat_tugas) {
+            $oldFilePath = public_path('uploads/dokumen/' . $kegiatan->surat_tugas);
+            if (File::exists($oldFilePath)) {
+                File::delete($oldFilePath);
+            }
+        }
+
         $file = $request->file('surat_tugas');
         $filename = time() . '_' . $file->getClientOriginalName();
-        $path = $file->storeAs('surat_tugas', $filename, 'public');
-        
-        // Hapus file lama jika ada
-        if ($kegiatan->surat_tugas && Storage::disk('public')->exists($kegiatan->surat_tugas)) {
-            Storage::disk('public')->delete($kegiatan->surat_tugas);
-        }
-        
-        $kegiatan->surat_tugas = $path;
+        $file->move(public_path('uploads/dokumen'), $filename);
+        $kegiatan->surat_tugas = $filename;
     }
     
     $kegiatan->update([
@@ -400,21 +402,18 @@ public function delete_ajax($id)
         $pdf->setOption("isRemoteEnabled", true); // Set true jika ada gambar dari URL
         return $pdf->stream('Data Kegiatan ' . date('Y-m-d H:i:s') . '.pdf');
     }
-    
-    public function download(string $id)
-    {
-        $kegiatan = KegiatanModel::find($id); // Cari data kegiatan berdasarkan ID
-        
+
+    public function download($filename)
+{
+
         // Ensure the file belongs to the current user
-        $fileExists = KegiatanModel::where('kegiatan_id', $kegiatan->kegiatan_id)
-            ->where('surat_tugas', $id)
-            ->exists();
+        $fileExists =KegiatanModel::where('surat_tugas', $filename)->exists();
 
         if (!$fileExists) {
             abort(403, 'Unauthorized access');
         }
 
-        $filePath = public_path('uploads/dokumen/' . $id);
+        $filePath = public_path('uploads/dokumen/' . $filename);
         
         if (File::exists($filePath)) {
             return response()->download($filePath);

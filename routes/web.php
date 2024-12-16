@@ -110,10 +110,6 @@ Route::group(['prefix' => 'kegiatan'], function () {
     Route::post('/{kegiatan_id}/surat-tugas', [KegiatanController::class, 'store_surat'])
         ->name('kegiatan.store_surat');
     Route::get('/download/{filename}', [KegiatanController::class, 'download'])->name('kegiatan.download');
-        Route::get('/download-surat-tugas/{id}', [KegiatanController::class, 'downloadSuratTugas'])
-        ->name('kegiatan.download-surat-tugas');
-        Route::delete('/surat-tugas/{kegiatan_id}', [KegiatanController::class, 'deleteSuratTugas'])
-        ->name('delete.surat_tugas');
 });
 Route::group(['prefix' => 'daftar_kegiatan'], function () {
     Route::get('/', [DaftarKegiatanController::class, 'index']);          // menampilkan halaman awal level
