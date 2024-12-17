@@ -15,6 +15,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\AgendaProgresController;
+use App\Http\Controllers\ApproveController;
 use App\Http\Controllers\RequestController;
 use Database\Seeders\KegiatanSeeder;
 use Symfony\Component\Routing\RequestContext;
@@ -265,6 +266,15 @@ Route::group(['prefix'=>'request'], function(){
     Route::post('/list/{id}',[RequestController::class,'listanggota']);
     Route::get('/create_ajax/{id}',[RequestController::class,'create_ajax']);
     Route::post('/ajax',[RequestController::class,'ajax']);
+    Route::get('{id}/confirm',[RequestController::class,'confirm']);
+    Route::delete('/{id}/delete_ajax',[RequestController::class,'delete']);
+    Route::get('/accept/{id}', [RequestController::class, 'accept']);   
+});
+Route::group(['prefix'=>'approve_anggota'], function(){
+    Route::get('/',[ApproveController::class,'index']);
+    Route::post('/list',[ApproveController::class,'list']);
+    Route::get('/masuk/{id}',[ApproveController::class,'masuk']);
+    Route::post('/list/{id}',[ApproveController::class,'listanggota']);
     Route::get('{id}/confirm',[RequestController::class,'confirm']);
     Route::delete('/{id}/delete_ajax',[RequestController::class,'delete']);
 });

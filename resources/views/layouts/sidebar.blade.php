@@ -165,6 +165,12 @@
                         <p>Daftar Kegiatan</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ url('/approve_anggota') }}" class="nav-link {{ $activeMenu == 'approve_anggota' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user-check"></i>
+                        <p>Approve Anggota</p>
+                    </a>
+                </li>
             <!-- Data Kegiatan -->
 
             <li class="nav-header">Kinerja Dosen</li>

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\KegiatanService;
 use App\Http\Resources\KegiatanResource;
 use App\Http\Resources\PendingApprovalResource;
+use App\Models\DetailKegiatanModel;
 use App\Models\JabatanModel;
 use App\Models\KegiatanModel;
 use App\Models\RequestModel;
@@ -175,8 +176,45 @@ class RequestController extends Controller
         'message' => 'Data berhasil dihapus.'
     ]);
 }
+public function approve(Request $request, $id)
+{
+    // Validasi request
+    $validator = Validator::make($request->all(), [
+        'bobot' => 'required|numeric', // Bobot wajib ada dalam request
+    ]);
 
-    
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Validasi gagal',
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    // Ambil data request berdasarkan ID
+    $requestData = RequestModel::with('dosen', 'kegiatan', 'jabatan')->find($id);
+
+    if (!$requestData) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Data request tidak ditemukan',
+        ], 404);
+    }
+
+    // Update status request menjadi 'approved'
+    $requestData->update(['status' => 'approved']);
+
+    // Tambahkan ke tabel DetailKegiatanModel
+    DetailKegiatanModel::create([
+        'kegiatan_id' => $requestData->kegiatan_id,
+        'nip' => $requestData->dosen_nip,
+        'id_jabatan' => $requestData->posisi_id,
+        'bobot' => $request->bobot, // Bobot diambil dari request
+    ]);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Data berhasil disetujui dan ditambahkan',
+    ]);
 }
-
-
+}
