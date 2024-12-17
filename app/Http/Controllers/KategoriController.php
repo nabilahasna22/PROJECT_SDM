@@ -35,4 +35,8 @@ class KategoriController extends Controller
     return DataTables::of($kategori)->addIndexColumn()->make(true);
     }
 
+    public function getKategori() {
+        // Logika untuk mendapatkan kategori
+        return KategoriModel::all();
+    }
 }
