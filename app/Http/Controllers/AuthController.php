@@ -10,7 +10,7 @@ class AuthController extends Controller
     {
         // Jika sudah login, maka redirect ke halaman home
         if (Auth::check()) {
-            return redirect('/');
+            return redirect('/simti');
         }
         return view('auth.login');
     }
@@ -27,7 +27,7 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Login Berhasil',
-                    'redirect' => url('/')
+                    'redirect' => url('/simti')
                 ]);
             }
             return response()->json([
@@ -43,6 +43,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('login');
+        return redirect('/');
     }
 }

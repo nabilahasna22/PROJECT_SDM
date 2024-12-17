@@ -16,9 +16,9 @@
     </div>
 </div>
 @else
-<form action="{{ url('/agenda_progres/update/' . $agenda_progres->id_progres) }}" method="POST" id="form-edit" enctype="multipart/form-data">
+<form id="form-edit" enctype="multipart/form-data">
     @csrf
-    @method('PUT')
+    <input type="hidden" name="_method" value="PUT">
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -87,6 +87,7 @@
 
 <script>
     $(document).ready(function() {
+<<<<<<< HEAD
         $("#form-edit").validate({
             rules: {
                 kegiatan_id: {
@@ -147,4 +148,48 @@
     });
     </script>
     
+=======
+        $('#form-edit').on('submit', function(e) {
+            e.preventDefault(); // Mencegah form submit default
+            let formData = new FormData(this);
+            let url = "{{ url('/agenda_progres/update/' . $agenda_progres->id_progres) }}";
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message
+                        }).then(() => {
+                            // Tutup modal
+                            $('#myModal').modal('hide');
+                            // Muat ulang tabel data
+                            $('#table-agenda_progres').DataTable().ajax.reload(null, false);
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan, coba lagi.'
+                    });
+                }
+            });
+        });
+    });
+</script>
+>>>>>>> 58812a327a271de3080e060814e4f8c05833d734
 @endempty

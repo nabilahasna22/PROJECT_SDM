@@ -1,5 +1,5 @@
 @empty($kegiatan)
-    <div id="modal-master" class="modal-dialog modal-lg" role="document">
+    <div id="myModal" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Kesalahan</h5>
@@ -20,7 +20,7 @@
     <form action="{{ url('/kegiatan/' . $kegiatan->kegiatan_id . '/delete_ajax') }}" method="POST" id="form-delete">
         @csrf
         @method('DELETE')
-        <div id="modal-master" class="modal-dialog modal-lg" role="document">
+        <div id="myModal" class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Hapus Data Kegiatan</h5>
@@ -35,7 +35,7 @@
                     </div>
                     <table class="table table-sm table-bordered table-striped">
                         <tr>
-                            <th class="text-right col-3">No:</th>
+                            <th class="text-right col-3">ID: </th>
                             <td class="col-9">{{ $kegiatan->kegiatan_id }}</td>
                         </tr>
                         <tr>
@@ -45,6 +45,10 @@
                         <tr>
                             <th class="text-right col-3">Deskripsi:</th>
                             <td class="col-9">{{ $kegiatan->deskripsi }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right col-3">Periode:</th>
+                            <td class="col-9">{{ $kegiatan->periode->tahun }}</td>
                         </tr>
                         <tr>
                             <th class="text-right col-3">Tanggal Mulai:</th>
@@ -59,8 +63,8 @@
                             <td class="col-9">{{ $kegiatan->status }}</td>
                         </tr>
                         <tr>
-                            <th class="text-right col-3">Jenis Kegiatan:</th>
-                            <td class="col-9">{{ $kegiatan->jenis_kegiatan }}</td>
+                            <th class="text-right col-3">Wilayah:</th>
+                            <td class="col-9">{{ $kegiatan->wilayah->nama_wilayah }}</td>
                         </tr>
                         <tr>
                             <th class="text-right col-3">Kategori:</th>
@@ -85,7 +89,7 @@
                         data: $(form).serialize(),
                         success: function(response) {
                             if (response.status) {
-                                $('#modal-master').modal('hide');
+                                $('#myModal').modal('hide');
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',

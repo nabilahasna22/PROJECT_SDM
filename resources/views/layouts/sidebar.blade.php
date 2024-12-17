@@ -38,20 +38,8 @@
 
             <!-- Admin: Akses semua menu -->
             @if(auth()->user()->level_id == 3)
-                <li class="nav-header">Laporan</li>
-                <li class="nav-item">
-                    <a href="{{ url('/laporan') }}" class="nav-link {{ $activeMenu == 'laporan' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-file-alt"></i>
-                        <p>Laporan Kegiatan</p>
-                    </a>
-                </li> 
+                
                 <li class="nav-header">Rekap Kegiatan</li>
-                <li class="nav-item">
-                    <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
-                        <i class="nav-icon far fa-calendar"></i>
-                        <p>Daftar Kegiatan</p>
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a href="{{ url('/progres') }}" class="nav-link {{ $activeMenu == 'progres' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
@@ -59,13 +47,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url('/progres') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
+                    <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
                         <p>Rekap Partisipasi</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url('/kegiatan') }}" class="nav-link {{ $activeMenu == 'kegiatan' ? 'active' : '' }}">
+                    <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
                         <p>Manajemen Agenda</p>
                     </a>
@@ -92,7 +80,12 @@
                     <p>Kategori Kegiatan</p>
                 </a>
             </li>
-
+            <li class="nav-item">
+                <a href="{{ url('/periode') }}" class="nav-link {{ $activeMenu == 'periode' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-list"></i>
+                    <p>Periode Kegiatan</p>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ url('/kegiatan') }}" class="nav-link {{ $activeMenu == 'kegiatan' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-calendar-alt"></i>
@@ -100,9 +93,15 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ url('/managejabatan') }}" class="nav-link {{ $activeMenu == 'managejabatan' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-calendar-alt"></i>
+                    <p>Manajemen Jabatan</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ url('/detailkegiatan') }}" class="nav-link {{ $activeMenu == 'detailkegiatan' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-book-open"></i>
-                    <p>Detail Kegiatan</p>
+                    <p>Kegiatan Anggota</p>
                 </a>
             </li>
             <li class="nav-item">
@@ -111,11 +110,17 @@
                     <p>Statistik Dosen</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ url('/jabatan') }}" class="nav-link {{ ($activeMenu == 'jabatan') ? 'active' : '' }}">
+                    <i class="nav-icon far fa-user"></i>
+                    <p>Manajemen Jabatan</p>
+                </a>
+            </li>
             @endif
             
             <!-- Dosen: Akses hanya Data Kegiatan, Dashboard, dan Edit Profile -->
             @if(auth()->user()->level_id == '2')
-                <li class="nav-header">Data Kegiatan</li>
+                <li class="nav-header">Informasi Kegiatan</li>
                 <li class="nav-item">
                     <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
                         <i class="nav-icon far fa-calendar"></i>
@@ -129,9 +134,9 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url('/progres') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
+                    <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
-                        <p>Rekap Partisipasi</p>
+                        <p>Kegiatan Diikuti</p>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -150,6 +155,7 @@
 
             <!-- Pimpinan: Akses semua menu kecuali Manajemen Pengguna dan Kategori Kegiatan -->
             @if(auth()->user()->level_id == '1')
+<<<<<<< HEAD
             <li class="nav-header">Laporan</li>
             <li class="nav-item">
                 <a href="{{ url('/laporan') }}" class="nav-link {{ $activeMenu == 'laporan' ? 'active' : '' }}">
@@ -223,6 +229,37 @@
                 <p>Statistik Dosen</p>
             </a>
         </li>
+=======
+                li class="nav-header">Draft Surat Tugas</li>
+                <li class="nav-item">
+                    <a href="{{ url('/laporan') }}" class="nav-link {{ $activeMenu == 'laporan' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-alt"></i>
+                        <p>Laporan Kegiatan</p>
+                    </a>
+                </li> 
+                <li class="nav-header">Data Pengguna</li>
+            <li class="nav-item">
+                <a href="{{ url('/user') }}" class="nav-link {{ ($activeMenu == 'user') ? 'active' : '' }}">
+                    <i class="nav-icon far fa-user"></i>
+                    <p>Data User</p>
+                </a>
+            </li>
+                <li class="nav-header">Rekap Kegiatan</li>
+                <li class="nav-item">
+                    <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>Daftar Kegiatan</p>
+                    </a>
+                </li>
+            <!-- Data Kegiatan -->
+            <li class="nav-header">Kinerja Dosen</li>
+            <li class="nav-item">
+                <a href="{{ url('/statistik_dosen') }}" class="nav-link {{ ($activeMenu == 'statistik_dosen') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-user-tie"></i>
+                    <p>Statistik Dosen</p>
+                </a>
+            </li>
+>>>>>>> 58812a327a271de3080e060814e4f8c05833d734
             @endif
 
             <!-- Logout: Akses untuk semua pengguna -->

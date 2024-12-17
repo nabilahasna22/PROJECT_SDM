@@ -24,6 +24,9 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
     @stack('css')
     <!-- Digunakan untuk memanggil custom css dari perintah push('css') pada masing-masing view -->
 </head>
@@ -107,5 +110,6 @@
         @stack('js')
         <!-- Digunakan untuk memanggil custom js dari perintah push('js') pada masing-masing view-->
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </html>

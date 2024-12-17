@@ -37,7 +37,7 @@ class UserController extends Controller
     $user = UserModel::select('nip', 'username', 'nama', 'email', 'password', 'no_telp', 'foto', 'alamat', 'foto', 'level_id')
         ->with('level'); // Mengambil data level terkait
 
-    // Filter berdasarkan level_id jika ada
+    // Filter berdasarkan level_id jika 
     $level_id = $request->input('filter_level');
     if (!empty($level_id)) {
         $user->where('level_id', $level_id);

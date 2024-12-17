@@ -1,5 +1,5 @@
 @empty($kegiatan)
-<div id="modal-master" class="modal-dialog modal-lg" role="document">
+<div id="myModal" class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">Kesalahan</h5>
@@ -17,10 +17,10 @@
     </div>
 </div>
 @else
-<form action="{{ url('/kegiatan/' . $kegiatan->kegiatan_id . '/update_ajax') }}" method="POST" id="form-edit">
+<form action="{{ url('/kegiatan/' . $kegiatan->kegiatan_id . '/update_ajax') }}" method="POST" id="form-edit" enctype="multipart/form-data">
     @csrf
     @method('PUT')
-    <div id="modal-master" class="modal-dialog modal-lg" role="document">
+    <div id="myModal" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Edit Data Kegiatan</h5>
@@ -29,6 +29,9 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-warning">
+                    <h5><i class="icon fas fa-edit"></i> Edit Informasi Kegiatan</h5>
+                </div>
                 <!-- Kategori Kegiatan -->
                 <div class="form-group">
                     <label>Kategori Kegiatan</label>
@@ -39,6 +42,30 @@
                         @endforeach
                     </select>
                     <small id="error-kategori_id" class="text-danger"></small>
+                </div>
+                
+                <!-- Wilayah -->
+                <div class="form-group">
+                    <label>Wilayah</label>
+                    <select name="id_wilayah" id="id_wilayah" class="form-control" required>
+                        <option value="">- Pilih Wilayah -</option>
+                        @foreach ($wilayah as $w)
+                            <option {{ $w->id_wilayah == $kegiatan->id_wilayah ? 'selected' : '' }} value="{{ $w->id_wilayah }}">{{ $w->nama_wilayah }}</option>
+                        @endforeach
+                    </select>
+                    <small id="error-id_wilayah" class="text-danger"></small>
+                </div>
+
+                <!-- Periode -->
+                <div class="form-group">
+                    <label>Periode</label>
+                    <select name="periode_id" id="periode_id" class="form-control" required>
+                        <option value="">- Pilih Periode -</option>
+                        @foreach ($periode as $p)
+                            <option {{ $p->periode_id == $kegiatan->periode_id ? 'selected' : '' }} value="{{ $p->periode_id }}">{{ $p->tahun }}</option>
+                        @endforeach
+                    </select>
+                    <small id="error-periode_id" class="text-danger"></small>
                 </div>
 
                 <!-- Nama Kegiatan -->
@@ -53,6 +80,20 @@
                     <label>Deskripsi</label>
                     <textarea name="deskripsi" id="deskripsi" class="form-control" rows="3">{{ old('deskripsi', $kegiatan->deskripsi) }}</textarea>
                     <small id="error-deskripsi" class="text-danger"></small>
+                </div>
+
+                <!-- Surat Tugas -->
+                <div class="form-group">
+                    <label>Surat Tugas</label>
+                    @if ($kegiatan->surat_tugas)
+                        <p>
+                            <a href="{{ url('kegiatan/download/' . $kegiatan->surat_tugas) }}" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="fas fa-download"></i> Lihat Dokumen
+                            </a>
+                        </p>
+                    @endif
+                    <input type="file" name="surat_tugas" class="form-control">
+                    <small class="form-text text-muted">Unggah dokumen (PDF/DOC/DOCX).</small>
                 </div>
 
                 <!-- Tanggal Mulai -->
@@ -81,26 +122,12 @@
                     <small id="error-tanggal_selesai" class="text-danger"></small>
                 </div>
 
-                <!-- Jenis Kegiatan -->
-                <div class="form-group">
-                    <label>Jenis Kegiatan</label>
-                    <input 
-                        value="{{ old('jenis_kegiatan', $kegiatan->jenis_kegiatan) }}" 
-                        type="text" 
-                        name="jenis_kegiatan" 
-                        id="jenis_kegiatan" 
-                        class="form-control" 
-                        required>
-                    <small id="error-jenis_kegiatan" class="text-danger"></small>
-                </div>
-
                 <!-- Status -->
                 <div class="form-group">
                     <label for="status">Status</label>
                     <select name="status" id="status" class="form-control" required>
-                        <option value="onprogres" {{ old('status', $kegiatan->status) == 'onprogres' ? 'selected' : '' }}>On Progres</option>
-                        <option value="completed" {{ old('status', $kegiatan->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="pending" {{ old('status', $kegiatan->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="on progres" {{ old('status', $kegiatan->status) == 'on progres' ? 'selected' : '' }}>On Progres</option>
+                        <option value="terlaksana" {{ old('status', $kegiatan->status) == 'terlaksana' ? 'selected' : '' }}>Terlaksana</option>
                     </select>
                     <small id="error-status" class="text-danger"></small>
                 </div>
@@ -112,18 +139,21 @@
         </div>
     </div>
 </form>
-@endempty
-
 <script>
     $(document).ready(function() {
         $("#form-edit").validate({
             rules: {
                 kategori_id: { required: true, number: true },
+                id_wilayah: { required: true, number: true },
+                periode_id: { required: true, number: true }, // Add rule for periode_id
                 kegiatan_nama: { required: true, minlength: 3, maxlength: 100 },
                 deskripsi: { maxlength: 255 },
+                surat_tugas: { 
+                accept: "pdf,doc,docx",
+                filesize: 2097152 // 2MB dalam bytes
+                },
                 tanggal_mulai: { required: true, date: true },
-                tanggal_selesai: { required: true, date: true },
-                jenis_kegiatan: { required: true, maxlength: 50 },
+                tanggal_selesai: { required: true, date: true },                
                 status: { required: true }
             },
             submitHandler: function(form) {
@@ -133,24 +163,40 @@
                     data: $(form).serialize(),
                     success: function(response) {
                         if (response.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil',
-                                text: response.message
-                            });
-                            tableKegiatan.ajax.reload();
-                            $('#myModal').modal('hide');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Kesalahan',
-                                text: response.message
-                            });
+                                $('#myModal').modal('hide');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: response.message
+                                });
+                                tableKegiatan.ajax.reload(); // Pastikan tableKegiatan adalah datatable untuk kegiatan
+                            } else {
+                                $('.error-text').text('');
+                                $.each(response.msgField, function(prefix, val) {
+                                    $('#error-' + prefix).text(val[0]);
+                                });
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Terjadi Kesalahan',
+                                    text: response.message
+                                });
                         }
                     }
                 });
                 return false;
+            },
+            errorElement: 'span',
+            errorPlacement: function(error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
             }
         });
     });
 </script>
+@endempty

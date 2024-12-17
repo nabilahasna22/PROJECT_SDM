@@ -9,24 +9,35 @@ class DetailKegiatanModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'detail_kegiatan';
-    protected $primaryKey = 'id';
+    protected $table = 'kegiatan_anggota';
+    protected $primaryKey = 'detail_id';
+
     protected $fillable = [
-        'kegiatan_id',   // Foreign key to Kegiatan
-        'nip',           // Foreign key to User's NIP
-        'jabatan',       // Job position
-        'bobot'          // Weight or percentage of the activity
+        'detail_id',
+        'kegiatan_id',
+        'nip',
+        'id_jabatan',
+        'bobot'
     ];
 
-    // Relationship with Kegiatan
     public function kegiatan()
     {
         return $this->belongsTo(KegiatanModel::class, 'kegiatan_id', 'kegiatan_id');
     }
 
-    // Relationship with User
-    public function t_user()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'nip', 'nip');
+        return $this->belongsTo(UserModel::class, 'nip', 'nip');
+    }    
+
+    public function jabatan()
+    {
+        return $this->belongsTo(JabatanModel::class, 'id_jabatan', 'id_jabatan');
     }
+
+    public function wilayah()
+{
+    return $this->belongsTo(Wilayah::class, 'wilayah_id', 'wilayah_id');
 }
+}
+
