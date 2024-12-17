@@ -16,8 +16,8 @@ class DetailKegiatanController extends Controller
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar Kegiatan Anggota',
-            'list' => ['Home', 'Kegiatan Anggota']
+            'title' => 'Daftar Anggota Kegiatan',
+            'list' => ['Home', 'Anggota Kegiatan']
         ];
 
         $page = (object) [

@@ -20,7 +20,7 @@ class KegiatanController extends Controller
     {
     $activeMenu = 'kegiatan';
     $breadcrumb = (object)[
-        'title' => 'Data Kegiatan',
+        'title' => 'Kelola Kegiatan',
         'list'  => ['Home', 'Kegiatan']
     ];
 

@@ -10,9 +10,9 @@ class ProgresModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'progres'; // Define the table name used by this model
-    protected $primaryKey = 'progres_id'; // Define the primary key for the table
-    protected $fillable = ['kegiatan_id', 'nip', 'tanggal', 'deskripsi']; // Define mass-assignable fields
+    protected $table = 'agenda_progres'; // Define the table name used by this model
+    protected $primaryKey = 'id_progres'; // Define the primary key for the table
+    protected $fillable = ['kegiatan_id', 'nip', 'file_dokumen', 'file_deskripsi', 'progress'];
 
     /**
      * Relationship with Kegiatan model.

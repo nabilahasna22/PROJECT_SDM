@@ -70,8 +70,8 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 150px;
-            height: 150px;
+            width: 300px;
+            height: 300px;
             pointer-events: none;
             background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 80%);
             border-radius: 50%;

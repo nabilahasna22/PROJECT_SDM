@@ -21,7 +21,6 @@
                         <th>ID</th>
                         <th>Nama Jabatan</th>
                         <th>Skor</th>
-                        <th>IsPIC</th>
                     </tr>
                 </thead>
             </table>
@@ -61,12 +60,6 @@
                         className: "",
                         orderable: true,
                         searchable: true
-                    },
-                    {
-                        data: "IsPIC",
-                        className: "",
-                        orderable: false,
-                        searchable: false,
                     }
                 ]
             });
