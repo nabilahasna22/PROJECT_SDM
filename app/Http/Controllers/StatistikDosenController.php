@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\KegiatanModel;
+use App\Models\StatistikDosenModel;
 use Yajra\DataTables\Facades\DataTables;
 
 class StatistikDosenController extends Controller
@@ -29,47 +28,27 @@ class StatistikDosenController extends Controller
     {
         try {
             if ($request->ajax()) {
-                // Ambil dosen berdasarkan level_id melalui LevelModel
-                $data = User::with('level') // Relasi ke LevelModel
-                    ->whereHas('level', function ($query) {
-                        $query->where('id', 2); // level_id = 2
-                    })
-                    ->select('nip', 'nama as nama_dosen')
-                    ->get();
-    
-                $data = $data->map(function ($item) {
-                    // Total kegiatan yang diikuti oleh dosen
-                    $item->total_kegiatan = \App\Models\KegiatanAnggota::where('nip', $item->nip)->count();
-    
-                    // Hitung kegiatan terprogram, non program, dan non JTI berdasarkan kategori_id
-                    $item->terprogram = \App\Models\KegiatanAnggota::where('nip', $item->nip)
-                        ->whereHas('kegiatan', function ($query) {
-                            $query->where('kategori_id', 1); // kategori_id = 1 (terprogram)
-                        })->count();
-    
-                    $item->non_program = \App\Models\KegiatanAnggota::where('nip', $item->nip)
-                        ->whereHas('kegiatan', function ($query) {
-                            $query->where('kategori_id', 2); // kategori_id = 2 (non program)
-                        })->count();
-    
-                    $item->non_jti = \App\Models\KegiatanAnggota::where('nip', $item->nip)
-                        ->whereHas('kegiatan', function ($query) {
-                            $query->where('kategori_id', 3); // kategori_id = 3 (non jti)
-                        })->count();
-    
-                    // Hitung total bobot berdasarkan kegiatan yang diikuti oleh dosen
-                    $item->total_bobot = \App\Models\KegiatanAnggota::where('nip', $item->nip)
-                        ->sum('bobot'); // Total bobot diambil dari kolom bobot di tabel kegiatan_anggota
-    
-                    return $item;
-                });
-    
+                // Ambil data statistik dosen dari model StatistikDosen
+                $data = StatistikDosenModel::getDataDosen();
+
                 return DataTables::of($data)
                     ->addIndexColumn()
+                    ->addColumn('aksi', function ($row) {
+                        // Ganti tombol aksi Edit dan Delete dengan Detail
+                        return '<a href="' . route('statistik_dosen.detail', $row->nip) . '" class="text-info">[Detail]</a>';
+                    })
+                    ->rawColumns(['aksi']) // Render HTML untuk kolom aksi
                     ->make(true);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-}    
+
+    // Menampilkan detail statistik dosen
+    public function detail($nip)
+    {
+        $dosen = StatistikDosenModel::findOrFail($nip);
+        return view('statistik_dosen.detail', compact('dosen'));
+    }
+}

@@ -15,6 +15,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\AgendaProgresController;
+use App\Http\Controllers\StatistikDosenController;
+
 use Database\Seeders\KegiatanSeeder;
 
 /*
@@ -194,5 +196,11 @@ Route::get('/create', [PeriodeController::class, 'create']);
 Route::get('/create_ajax', [PeriodeController::class, 'create_ajax']);
 Route::post('/store', [PeriodeController::class, 'store']);
 Route::post('/ajax', [PeriodeController::class, 'store_ajax']);
+});
+
+Route::prefix('statistik_dosen')->group(function () {
+    Route::get('/', [StatistikDosenController::class, 'index'])->name('statistik_dosen.index');
+    Route::post('/list', [StatistikDosenController::class, 'list'])->name('statistik_dosen.list');
+    Route::get('/detail/{nip}', [StatistikDosenController::class, 'detail'])->name('statistik_dosen.detail');
 });
 });
