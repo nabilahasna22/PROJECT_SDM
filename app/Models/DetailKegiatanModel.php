@@ -10,14 +10,15 @@ class DetailKegiatanModel extends Model
     use HasFactory;
 
     protected $table = 'kegiatan_anggota';
-    protected $primaryKey = 'detail_id';
+    protected $primaryKey = 'anggota_id';
 
     protected $fillable = [
-        'detail_id',
+        'anggota_id',
         'kegiatan_id',
         'nip',
         'id_jabatan',
-        'bobot'
+        'bobot',
+        'anggota_id'
     ];
 
     public function kegiatan()

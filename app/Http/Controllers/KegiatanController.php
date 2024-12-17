@@ -1,9 +1,11 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\DetailKegiatanModel;
 use App\Models\KegiatanModel;
 use App\Models\KategoriModel;
 use App\Models\PeriodeModel;
+use App\Models\UserModel;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -28,14 +30,17 @@ class KegiatanController extends Controller
     $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
     $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
     $periode = PeriodeModel::select('periode_id', 'tahun')->get();
-
+    $user = UserModel::select('nip', 'nama')->get();
+    
     // Mengirim semua data ke view
     return view('kegiatan.index', [
         'activeMenu'  => $activeMenu,
         'breadcrumb'  => $breadcrumb,
         'kategori'    => $kategori,
         'wilayah'     => $wilayah,
-        'periode'     => $periode
+        'periode'     => $periode,
+        'user'        => $user
+
     ]);
     }
 
@@ -100,20 +105,105 @@ class KegiatanController extends Controller
 
     public function edit_ajax(string $id)
     {
-        $kegiatan = KegiatanModel::find($id); // Cari data kegiatan berdasarkan ID
-        $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get(); // Ambil data kategori
-        $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get(); // Ambil data wilayah
-        $periode = PeriodeModel::select('periode_id', 'tahun')->get();
-    
-        return view('kegiatan.edit_ajax', [
-            'kegiatan' => $kegiatan,
-            'kategori' => $kategori,
-            'wilayah' => $wilayah,
-            'periode' => $periode
-        ]);
+    $kegiatan = KegiatanModel::find($id); // Data kegiatan utama
+    $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
+    $wilayah = Wilayah::select('id_wilayah', 'nama_wilayah')->get();
+    $periode = PeriodeModel::select('periode_id', 'tahun')->get();
+    $user = UserModel::select('nip', 'nama')->get(); // Data user untuk dropdown PIC
+    $kegiatanAnggota = DetailKegiatanModel::where('kegiatan_id', $id)->first(); // Data PIC terkait kegiatan
+
+    return view('kegiatan.edit_ajax', [
+        'kegiatan' => $kegiatan,
+        'kategori' => $kategori,
+        'wilayah' => $wilayah,
+        'periode' => $periode,
+        'user' => $user,
+        'kegiatanAnggota' => $kegiatanAnggota
+    ]);
     }
+
     
-    public function update_ajax(Request $request, $id)
+//     public function update_ajax(Request $request, $id)
+// {
+//     // Validasi request
+//     $rules = [
+//         'kategori_id'      => 'sometimes|exists:kategori,kategori_id',
+//         'id_wilayah'       => 'sometimes|exists:wilayah_kegiatan,id_wilayah',
+//         'kegiatan_nama'    => 'sometimes|string|min:3|max:100',
+//         'deskripsi'        => 'nullable|string|max:500',
+//         'tanggal_mulai'    => 'sometimes|date',
+//         'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
+//         'status'           => 'sometimes|string|in:on progres,terlaksana',
+//         'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
+//         'surat_tugas'      => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+//         'nip'              => 'required|exists:user,nip', // Tambahkan validasi untuk PIC
+//     ];
+
+//     $validator = Validator::make($request->all(), $rules);
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => 'Validasi gagal.',
+//             'errors' => $validator->errors()
+//         ], 422);
+//     }
+
+//     // Cari data kegiatan
+//     $kegiatan = KegiatanModel::find($id);
+//     if (!$kegiatan) {
+//         return response()->json([
+//             'status' => false,
+//             'message' => 'Data kegiatan tidak ditemukan.'
+//         ], 404);
+//     }
+
+//     // Proses upload surat tugas
+//     if ($request->hasFile('surat_tugas')) {
+//         // Hapus file lama jika ada
+//         if ($kegiatan->surat_tugas && File::exists(public_path('uploads/dokumen/' . $kegiatan->surat_tugas))) {
+//             File::delete(public_path('uploads/dokumen/' . $kegiatan->surat_tugas));
+//         }
+
+//         // Simpan file baru
+//         $filename = time() . '_' . $request->file('surat_tugas')->getClientOriginalName();
+//         $request->file('surat_tugas')->move(public_path('uploads/dokumen'), $filename);
+//         $kegiatan->surat_tugas = $filename;
+//     }
+
+//     // Update data kegiatan
+//     $updateData = array_filter([
+//         'kategori_id'      => $request->kategori_id,
+//         'id_wilayah'       => $request->id_wilayah,
+//         'kegiatan_nama'    => $request->kegiatan_nama,
+//         'deskripsi'        => $request->deskripsi,
+//         'tanggal_mulai'    => $request->tanggal_mulai,
+//         'tanggal_selesai'  => $request->tanggal_selesai,
+//         'status'           => $request->status,
+//         'periode_id'       => $request->periode_id,
+//         'surat_tugas'      => $kegiatan->surat_tugas ?? null, // Tetap gunakan jika tidak ada perubahan
+//     ]);
+
+//     $kegiatan->update($updateData);
+
+//     // Simpan PIC (NIP) ke tabel kegiatan anggota
+//     // Ini akan menambahkan atau memperbarui data pada tabel 'kegiatan_anggota'
+//     DetailKegiatanModel::updateOrCreate(
+//         ['kegiatan_id' => $id, 'nip' => $request->nip], // Kondisi unik
+//         [
+//             'nip' => $request->nip,
+//             'id_jabatan' => 1, // Set default id_jabatan = 1
+//             'bobot' => 8
+//         ]
+//     );
+
+//     return response()->json([
+//         'status' => true,
+//         'message' => 'Data kegiatan berhasil diperbarui.',
+//         'data' => $kegiatan
+//     ]);
+// }
+
+public function update_ajax(Request $request, $id)
 {
     // Validasi request
     $rules = [
@@ -123,11 +213,12 @@ class KegiatanController extends Controller
         'deskripsi'        => 'nullable|string|max:500',
         'tanggal_mulai'    => 'sometimes|date',
         'tanggal_selesai'  => 'sometimes|date|after_or_equal:tanggal_mulai',
-        'status'           => 'sometimes|string|in:on progres,terlaksana',        
+        'status'           => 'sometimes|string|in:on progres,terlaksana',
         'periode_id'       => 'required|exists:periode_kegiatan,periode_id',
-        'surat_tugas'      => 'nullable|file|mimes:pdf,doc,docx|max:2048', // contoh batasan file
+        'surat_tugas'      => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        'nip'              => 'required|exists:user,nip', // Tambahkan validasi untuk PIC
     ];
-    
+
     $validator = Validator::make($request->all(), $rules);
     if ($validator->fails()) {
         return response()->json([
@@ -136,49 +227,64 @@ class KegiatanController extends Controller
             'errors' => $validator->errors()
         ], 422);
     }
-    
+
+    // Cari data kegiatan
     $kegiatan = KegiatanModel::find($id);
     if (!$kegiatan) {
         return response()->json([
             'status' => false,
-            'message' => 'Data kegiatan tidak ditemukan'
+            'message' => 'Data kegiatan tidak ditemukan.'
         ], 404);
     }
-    
+
     // Proses upload surat tugas
     if ($request->hasFile('surat_tugas')) {
-        // Delete old file if exists
-        if ($kegiatan->surat_tugas) {
-            $oldFilePath = public_path('uploads/dokumen/' . $kegiatan->surat_tugas);
-            if (File::exists($oldFilePath)) {
-                File::delete($oldFilePath);
-            }
+        // Hapus file lama jika ada
+        if ($kegiatan->surat_tugas && File::exists(public_path('uploads/dokumen/' . $kegiatan->surat_tugas))) {
+            File::delete(public_path('uploads/dokumen/' . $kegiatan->surat_tugas));
         }
 
-        $file = $request->file('surat_tugas');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('uploads/dokumen'), $filename);
+        // Simpan file baru
+        $filename = time() . '_' . $request->file('surat_tugas')->getClientOriginalName();
+        $request->file('surat_tugas')->move(public_path('uploads/dokumen'), $filename);
         $kegiatan->surat_tugas = $filename;
     }
-    
-    $kegiatan->update([
-        'kategori_id'      => $request->kategori_id ?? $kegiatan->kategori_id,
-        'id_wilayah'       => $request->id_wilayah ?? $kegiatan->id_wilayah,
-        'kegiatan_nama'    => $request->kegiatan_nama ?? $kegiatan->kegiatan_nama,
-        'deskripsi'        => $request->deskripsi ?? $kegiatan->deskripsi,
-        'tanggal_mulai'    => $request->tanggal_mulai ?? $kegiatan->tanggal_mulai,
-        'tanggal_selesai'  => $request->tanggal_selesai ?? $kegiatan->tanggal_selesai,
-        'status'           => $request->status ?? $kegiatan->status,
-        'periode_id'       => $request->periode_id ?? $kegiatan->periode_id,
-        'surat_tugas'      => $kegiatan->surat_tugas, // Tambahkan ini
+
+    // Update data kegiatan
+    $updateData = array_filter([
+        'kategori_id'      => $request->kategori_id,
+        'id_wilayah'       => $request->id_wilayah,
+        'kegiatan_nama'    => $request->kegiatan_nama,
+        'deskripsi'        => $request->deskripsi,
+        'tanggal_mulai'    => $request->tanggal_mulai,
+        'tanggal_selesai'  => $request->tanggal_selesai,
+        'status'           => $request->status,
+        'periode_id'       => $request->periode_id,
+        'surat_tugas'      => $kegiatan->surat_tugas ?? null, // Tetap gunakan jika tidak ada perubahan
     ]);
-    
+
+    // Update kegiatan
+    $kegiatan->update($updateData);
+
+    // Simpan PIC (NIP) ke tabel kegiatan anggota
+    DetailKegiatanModel::updateOrCreate(
+        ['kegiatan_id' => $id, 'nip' => $request->nip], // Kondisi unik
+        [
+            'nip' => $request->nip,
+            'id_jabatan' => 1, // Set default id_jabatan = 1
+            'bobot' => 8
+        ]
+    );
+
+    // Mengembalikan response dengan data kegiatan yang telah diperbarui
     return response()->json([
         'status' => true,
-        'message' => 'Data kegiatan berhasil diperbarui',
-        'data' => $kegiatan
+        'message' => 'Data kegiatan berhasil diperbarui.',
+        'data' => $kegiatan // Menyertakan data kegiatan yang diperbarui
     ]);
 }
+
+
 
 public function store_ajax(Request $request)
 {

@@ -1,3 +1,4 @@
+
 @empty($kegiatan)
 <div id="myModal" class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -82,6 +83,23 @@
                     <small id="error-deskripsi" class="text-danger"></small>
                 </div>
 
+                <!-- Pilih PIC -->
+                <div class="form-group">
+                    <label>Pilih PIC</label>
+                    <select name="nip" id="nip" class="form-control" required>
+                        <option value="">- Pilih PIC -</option>
+                        @foreach ($user as $u)
+                            <option {{ $u->nip == old('nip', isset($kegiatanAnggota) ? $kegiatanAnggota->nip : '') ? 'selected' : '' }} 
+                                value="{{ $u->nip }}">
+                                {{ $u->nip }} - {{ $u->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small id="error-nip" class="text-danger"></small>
+                </div>
+                
+
+
                 <!-- Surat Tugas -->
                 <div class="form-group">
                     <label>Surat Tugas</label>
@@ -140,63 +158,61 @@
     </div>
 </form>
 <script>
-    $(document).ready(function() {
-        $("#form-edit").validate({
-            rules: {
-                kategori_id: { required: true, number: true },
-                id_wilayah: { required: true, number: true },
-                periode_id: { required: true, number: true }, // Add rule for periode_id
-                kegiatan_nama: { required: true, minlength: 3, maxlength: 100 },
-                deskripsi: { maxlength: 255 },
-                surat_tugas: { 
-                accept: "pdf,doc,docx",
-                filesize: 2097152 // 2MB dalam bytes
-                },
-                tanggal_mulai: { required: true, date: true },
-                tanggal_selesai: { required: true, date: true },                
-                status: { required: true }
-            },
-            submitHandler: function(form) {
-                $.ajax({
-                    url: form.action,
-                    type: form.method,
-                    data: $(form).serialize(),
-                    success: function(response) {
-                        if (response.status) {
-                                $('#myModal').modal('hide');
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil',
-                                    text: response.message
-                                });
-                                tableKegiatan.ajax.reload(); // Pastikan tableKegiatan adalah datatable untuk kegiatan
-                            } else {
-                                $('.error-text').text('');
-                                $.each(response.msgField, function(prefix, val) {
-                                    $('#error-' + prefix).text(val[0]);
-                                });
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Terjadi Kesalahan',
-                                    text: response.message
-                                });
-                        }
-                    }
-                });
-                return false;
-            },
-            errorElement: 'span',
-            errorPlacement: function(error, element) {
-                error.addClass('invalid-feedback');
-                element.closest('.form-group').append(error);
-            },
-            highlight: function(element, errorClass, validClass) {
-                $(element).addClass('is-invalid');
-            },
-            unhighlight: function(element, errorClass, validClass) {
-                $(element).removeClass('is-invalid');
+    $('#form-edit').on('submit', function(e) {
+    e.preventDefault();
+
+    // Ambil data form
+    let formData = new FormData(this);
+    let formAction = $(this).attr('action');
+
+    // Kirim AJAX request
+    $.ajax({
+        url: formAction,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+            // Tampilkan loading SweetAlert
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Harap tunggu',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        },
+        success: function(response) {
+            // Jika berhasil
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: response.message,
+            }).then(() => {
+                // Reload halaman atau lakukan aksi lain
+                location.reload();
+            });
+        },
+        error: function(xhr) {
+            // Jika gagal validasi atau error lainnya
+            let errors = xhr.responseJSON.errors || {};
+            let errorMessage = xhr.responseJSON.message || 'Terjadi kesalahan';
+
+            // Tampilkan pesan error umum
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: errorMessage,
+            });
+
+            // Tampilkan error di setiap field (jika ada)
+            for (let field in errors) {
+                $(`#error-${field}`).text(errors[field][0]);
             }
-        });
+        }
     });
+});
+
 </script>
 @endempty

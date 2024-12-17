@@ -4,7 +4,7 @@
 
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Daftar Kegiatan Anggota</h3>
+        <h3 class="card-title">Daftar Anggota Kegiatan</h3>
         <div class="card-tools">
             <button onclick="modalAction('{{ url('/detailkegiatan/import') }}')" class="btn btn-info">Import Data</button>
             <a href="{{ url('/detailkegiatan/export_excel') }}" class="btn btn-primary">
