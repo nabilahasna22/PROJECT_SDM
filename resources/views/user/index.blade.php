@@ -53,6 +53,7 @@
                 </table>
             </div>
         </div>
+        </div>
     </div>
     <div id="myModal" class="modal fade animate shake" tabindex="-1" data-backdrop="static" data-keyboard="false"
         data-width="75%"></div>

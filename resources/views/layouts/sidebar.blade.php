@@ -112,6 +112,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url('/request') }}" class="nav-link {{ $activeMenu == 'request' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <p>Request Anggota</p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url('/progres') }}" class="nav-link {{ $activeMenu == 'progres' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
                         <p>Progres Kegiatan</p>

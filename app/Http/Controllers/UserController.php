@@ -26,7 +26,6 @@ class UserController extends Controller
             'title' => 'Daftar user yang terdaftar dalam sistem'
         ];
         $activeMenu = 'user'; // set menu yang sedang aktif
-
         $level = LevelModel::all();
         return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
     }
@@ -42,7 +41,6 @@ class UserController extends Controller
     $level_id = $request->input('filter_level');
     if (!empty($level_id)) {
         $user->where('level_id', $level_id);
-
     }
 
     return DataTables::of($user)

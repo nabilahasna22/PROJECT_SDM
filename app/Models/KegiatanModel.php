@@ -55,4 +55,8 @@ class KegiatanModel extends Model
         return $this->hasMany(AgendaProgresModel::class, 'kegiatan_id', 'kegiatan_id');
     }
     
+    public function progres()
+    {
+        return $this->hasMany(ProgresModel::class, 'kegiatan_id', 'kegiatan_id');
+    }
 }
