@@ -44,11 +44,7 @@
                 </div>
             </div>
             
-<<<<<<< HEAD
-            <table class="table table-bordered table-sm table-striped table-hover" id="table-agendaprogres">
-=======
             <table class="table table-bordered table-sm table-striped table-hover" id="table-agenda_progres">
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
                 <thead>
                     <tr>
                         <th>No</th>
@@ -100,11 +96,7 @@
                     },
                     success: function(response) {
                         if (response.status === 'success') {
-<<<<<<< HEAD
-                            $('#table-agendaprogres').DataTable().ajax.reload();
-=======
                             $('#table-agenda_progres').DataTable().ajax.reload();
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
                             toastr.success(response.message);
                         } else {
                             toastr.error(response.message);
@@ -118,11 +110,7 @@
         }
 
         $(document).ready(function() {
-<<<<<<< HEAD
-            var dataAgendaprogres = $('#table-agendaprogres').DataTable({
-=======
             var dataAgendaprogres = $('#table-agenda_progres').DataTable({
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
                 processing: true,
                 serverSide: true,
                 ajax: {

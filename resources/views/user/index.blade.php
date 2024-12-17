@@ -6,11 +6,7 @@
             <div class="card-tools">
                 <button onclick="modalAction('{{ url('/user/import') }}')" class="btn btn-info">Import Data User</button>
                 <a href="{{ url('/user/export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i> Export Data User</a>
-<<<<<<< HEAD
-                <a href="{{ url('/user/export_pdf') }}" class="btn btn-warning"><i class="fa fa-file-pdf"></i> Export Data User</a> 
-=======
                 <a href="{{ url('/user/export_pdf') }}" class="btn btn-warning"><i class="fa fa-file-pdf"></i> Export Data User</a>
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
                 <button onclick="modalAction('{{ url('/user/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
             </div>
         </div>
@@ -37,25 +33,6 @@
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
-            <table class="table table-bordered table-sm table-striped table-hover" id="table-user">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>NIP</th>
-                        <th>Username</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>No Telepon</th>
-                        <th>Alamat</th>
-                        <th>Level</th>
-                        <th>Foto Profil</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-=======
             <div class="table-responsive"> <!-- Membuat tabel responsif -->
                 <table class="table table-bordered table-sm table-striped table-hover" id="table-user">
                     <thead>
@@ -75,7 +52,6 @@
                     <tbody></tbody>
                 </table>
             </div>
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
         </div>
         </div>
     </div>
@@ -117,13 +93,8 @@
                     "url": "{{ url('user/list') }}",
                     "dataType": "json",
                     "type": "POST",
-<<<<<<< HEAD
-                    "data": function(d){
-                        d.filter_level=$('#filter_level_id').val();
-=======
                     "data": function(d) {
                         d.filter_level = $('#filter_level_id').val();
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
                     }
                 },
                 columns: [{
@@ -161,12 +132,6 @@
                     searchable: false
                 }, {
                     data: "foto",
-<<<<<<< HEAD
-                    className: "",
-                    width: "14%",
-                    orderable: false,
-                    searchable: false
-=======
                     orderable: false,
                     searchable: false,
                     render: function(data, type, row) {
@@ -176,7 +141,6 @@
                             return `<div class="foto-placeholder"></div>`;
                         }
                     }
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
                 }, {
                     data: "aksi",
                     className: "text-center",
@@ -185,14 +149,8 @@
                 }]
             });
 
-<<<<<<< HEAD
-
-            $('#filter_level_id').on('change', function(){
-              dataUser.ajax.reload();
-=======
             $('#filter_level_id').on('change', function() {
                 dataUser.ajax.reload();
->>>>>>> 58812a327a271de3080e060814e4f8c05833d734
             });
         });
     </script>

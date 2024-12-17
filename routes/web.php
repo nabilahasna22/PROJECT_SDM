@@ -15,7 +15,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\AgendaProgresController;
+use App\Http\Controllers\RequestController;
 use Database\Seeders\KegiatanSeeder;
+use Symfony\Component\Routing\RequestContext;
 
 /*
 |--------------------------------------------------------------------------
@@ -246,5 +248,16 @@ Route::get('/create', [PeriodeController::class, 'create']);
 Route::get('/create_ajax', [PeriodeController::class, 'create_ajax']);
 Route::post('/store', [PeriodeController::class, 'store']);
 Route::post('/ajax', [PeriodeController::class, 'store_ajax']);
+});
+
+Route::group(['prefix'=>'request'], function(){
+    Route::get('/',[RequestController::class,'index']);
+    Route::post('/list',[RequestController::class,'list']);
+    Route::get('/masuk/{id}',[RequestController::class,'masuk']);
+    Route::post('/list/{id}',[RequestController::class,'listanggota']);
+    Route::get('/create_ajax/{id}',[RequestController::class,'create_ajax']);
+    Route::post('/ajax',[RequestController::class,'ajax']);
+    Route::get('{id}/confirm',[RequestController::class,'confirm']);
+    Route::delete('/{id}/delete_ajax',[RequestController::class,'delete']);
 });
 });

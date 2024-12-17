@@ -42,7 +42,7 @@ class DetailKegiatanController extends Controller
 
     public function list(Request $request)
     {
-        $detailKegiatan = DetailKegiatanModel::select('detail_id', 'kegiatan_id', 'nip', 'id_jabatan', 'bobot')
+        $detailKegiatan = DetailKegiatanModel::select('anggota_id', 'kegiatan_id', 'nip', 'id_jabatan', 'bobot')
             ->with(['kegiatan', 'user', 'jabatan']);
 
         return DataTables::of($detailKegiatan)
@@ -50,8 +50,8 @@ class DetailKegiatanController extends Controller
             ->addColumn('aksi', function ($row) {
                 return '
                     <div class="btn-group">
-                        <button onclick="modalAction(\''.url('/detailkegiatan/edit/').'/'.$row->detail_id.'\')" class="btn btn-sm btn-warning">Edit</button>
-                        <button onclick="modalAction(\''.url('/detailkegiatan/show_ajax/').'/'.$row->detail_id.'\')" class="btn btn-sm btn-info">Detail</button>               
+                        <button onclick="modalAction(\''.url('/detailkegiatan/edit/').'/'.$row->anggota_id.'\')" class="btn btn-sm btn-warning">Edit</button>
+                        <button onclick="modalAction(\''.url('/detailkegiatan/show_ajax/').'/'.$row->anggota_id.'\')" class="btn btn-sm btn-info">Detail</button>               
                     </div>
                 ';
             })
@@ -62,7 +62,7 @@ class DetailKegiatanController extends Controller
     public function show_ajax($id)
     {
         $detailKegiatan = DetailKegiatanModel::with(['kegiatan', 'user', 'jabatan'])
-            ->where('detail_id', $id)
+            ->where('anggota_id', $id)
             ->first();
 
         if (!$detailKegiatan) {
