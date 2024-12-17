@@ -26,7 +26,7 @@
                     <th>NIP</th>
                     <th>Jabatan</th>
                     <th>Bobot</th>
-                    <th>Aksi</th>
+                    
                 </tr>
             </thead>
             <tbody></tbody>
@@ -72,7 +72,7 @@
                 { data: 'user.nip', defaultContent: '-' },
                 { data: 'jabatan.nama_jabatan', defaultContent: '-' },
                 { data: 'bobot' },
-                { data: 'aksi', orderable: false, searchable: false }
+             
             ]
         });
 
