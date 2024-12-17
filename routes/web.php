@@ -270,12 +270,13 @@ Route::group(['prefix'=>'request'], function(){
     Route::delete('/{id}/delete_ajax',[RequestController::class,'delete']);
     Route::get('/accept/{id}', [RequestController::class, 'accept']);   
 });
-Route::group(['prefix'=>'approve_anggota'], function(){
-    Route::get('/',[ApproveController::class,'index']);
-    Route::post('/list',[ApproveController::class,'list']);
-    Route::get('/masuk/{id}',[ApproveController::class,'masuk']);
-    Route::post('/list/{id}',[ApproveController::class,'listanggota']);
-    Route::get('{id}/confirm',[RequestController::class,'confirm']);
-    Route::delete('/{id}/delete_ajax',[RequestController::class,'delete']);
+Route::group(['prefix' => 'approve_anggota'], function () {
+    Route::get('/', [ApproveController::class, 'index']);
+    Route::post('/list', [ApproveController::class, 'list']);
+    Route::get('/masuk/{id}', [ApproveController::class, 'masuk']);
+    Route::post('/list/{id}', [ApproveController::class, 'listanggota']);
+    Route::get('/accept/{id}', [ApproveController::class, 'approve']);
+    Route::get('/decline/{id}', [ApproveController::class, 'decline']);
+
 });
 });
