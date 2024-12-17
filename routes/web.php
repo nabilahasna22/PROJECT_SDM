@@ -11,9 +11,12 @@ use App\Http\Controllers\DaftarKegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProgresController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\AgendaProgresController;
+use App\Http\Controllers\StatistikDosenController;
+
 use Database\Seeders\KegiatanSeeder;
 
 /*
@@ -39,6 +42,19 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/', [WelcomeController::class, 'index']); // Rute utama
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::middleware(['auth', 'checkLevel:1'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'pimpinanDashboard']); // Pimpinan
+    });
+    
+    Route::middleware(['auth', 'checkLevel:2'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'dosenDashboard']); // Dosen
+    });
+    
+    Route::middleware(['auth', 'checkLevel:3'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'adminDashboard']); // Admin
+    });    
     Route::get('/simti', [WelcomeController::class, 'index']); // Hanya bisa diakses jika sudah login
 
 Route::group(['prefix' => 'user'], function () {
@@ -188,5 +204,11 @@ Route::get('/create', [PeriodeController::class, 'create']);
 Route::get('/create_ajax', [PeriodeController::class, 'create_ajax']);
 Route::post('/store', [PeriodeController::class, 'store']);
 Route::post('/ajax', [PeriodeController::class, 'store_ajax']);
+});
+
+Route::prefix('statistik_dosen')->group(function () {
+    Route::get('/', [StatistikDosenController::class, 'index'])->name('statistik_dosen.index');
+    Route::post('/list', [StatistikDosenController::class, 'list'])->name('statistik_dosen.list');
+    Route::get('/detail/{nip}', [StatistikDosenController::class, 'detail'])->name('statistik_dosen.detail');
 });
 });
