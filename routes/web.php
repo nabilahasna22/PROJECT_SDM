@@ -11,14 +11,11 @@ use App\Http\Controllers\DaftarKegiatanController;
 use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProgresController;
-<<<<<<< HEAD
 use App\Http\Controllers\DashboardController;
-=======
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\AgendaProgresController;
 use Database\Seeders\KegiatanSeeder;
->>>>>>> 5fdd46a0f799a870cf7641a8ebb482c4bfe89f7d
 
 /*
 |--------------------------------------------------------------------------

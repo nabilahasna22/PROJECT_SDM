@@ -28,6 +28,10 @@ class KategoriController extends Controller
         // $kategori = kategoriModel::all(); // ambil data kategori untuk filter kategori
         return view('kategori.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
     }
+    public function getKategori() {
+        // Logika untuk mendapatkan kategori
+        return KategoriModel::all(); // 
+    }
     // Ambil data kategori dalam bentuk json untuk datatables
     public function list(Request $request)
     {
