@@ -117,15 +117,23 @@ Route::group(['prefix' => 'daftar_kegiatan'], function () {
     Route::get('/kegiatan/user', [DaftarKegiatanController::class, 'kegiatanUser']);
 
 });
+// Route::group(['prefix' => 'progres'], function () {
+//     Route::get('/', [ProgresController::class, 'index']);          // menampilkan halaman awal level
+//     Route::post('/list', [ProgresController::class, 'list']);      // menampilkan data level dalam bentuk json untuk datatables
+//     Route::get('/create', [ProgresController::class, 'create']);   // menampilkan halaman form tambah level
+//     Route::post('/', [ProgresController::class, 'store']);         // menyimpan data level baru
+//     Route::get('/{id}', [ProgresController::class, 'show']);       // menampilkan detail level
+//     Route::get('/edit_ajax/{id}', [ProgresController::class, 'edit_ajax'])->name('progres.edit_ajax'); 
+//     Route::put('/update/{id}', [ProgresController::class, 'update']);     // menyimpan perubahan data level
+//     Route::delete('/{id}', [ProgresController::class, 'destroy']); // menghapus data level
+// });
 Route::group(['prefix' => 'progres'], function () {
-    Route::get('/', [ProgresController::class, 'index']);          // menampilkan halaman awal level
-    Route::post('/list', [ProgresController::class, 'list']);      // menampilkan data level dalam bentuk json untuk datatables
-    Route::get('/create', [ProgresController::class, 'create']);   // menampilkan halaman form tambah level
-    Route::post('/', [ProgresController::class, 'store']);         // menyimpan data level baru
-    Route::get('/{id}', [ProgresController::class, 'show']);       // menampilkan detail level
-    Route::get('/{id}/edit', [ProgresController::class, 'edit']);  // menampilkan halaman form edit level
-    Route::put('/{id}', [ProgresController::class, 'update']);     // menyimpan perubahan data level
-    Route::delete('/{id}', [ProgresController::class, 'destroy']); // menghapus data level
+    Route::get('/', [ProgresController::class, 'index']);
+    Route::post('/list', [ProgresController::class, 'list'])->name('progres.list');
+    Route::get('/edit_ajax/{id}', [ProgresController::class, 'edit_ajax'])->name('progres.edit_ajax');
+    Route::put('/update/{id}', [ProgresController::class, 'update'])->name('progres.update');
+    Route::delete('/{id}', [ProgresController::class, 'delete'])->name('progres.delete');
+    Route::get('/download/{filename}', [ProgresController::class, 'download'])->name('progres.download');
 });
 Route::prefix('agenda_progres')->group(function () {
     // Index/List

@@ -1,119 +1,134 @@
 @extends('layouts.template')
+
 @section('content')
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Daftar Progres</h3>
             <div class="card-tools">
-                <button onclick="modalAction('{{ url('/progres/import') }}')" class="btn btn-info">Import Data</button>
-                <a href="{{ url('/progres/export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i> Export Excel</a>
-                <a href="{{ url('/progres/export_pdf') }}" class="btn btn-warning"><i class="fa fa-file-pdf"></i> Export PDF</a>
-                <button onclick="modalAction('{{ url('/progres/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
+                <!-- Filter status progress -->
+                <select id="filter_progress" class="form-control form-control-sm">
+                    <option value="">Semua Status</option>
+                    <option value="on_progress">Sedang Berjalan</option>
+                    <option value="completed">Selesai</option>
+                    <option value="not_started">Belum Dimulai</option>
+                </select>
             </div>
         </div>
         <div class="card-body">
-            <!-- untuk Filter data -->
-            
-            </div>
             @if (session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
             @if (session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
-            <table class="table table-bordered table-sm table-striped table-hover" id="table-progres">
+            
+            <table class="table table-bordered table-sm table-striped table-hover" id="table-agenda_progres">
                 <thead>
                     <tr>
                         <th>No</th>
                         <th>Kegiatan</th>
                         <th>NIP</th>
-                        <th>Tanggal</th>
-                        <th>Deskripsi</th>
                         <th>File Dokumen</th>
-                        <th>Aksi</th>
+                        <th>Keterangan File</th>
+                    
                     </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
-    <div id="myModal" class="modal fade animate shake" tabindex="-1" data-backdrop="static" data-keyboard="false"
-        data-width="75%"></div>
+    
+    <!-- Modal untuk aksi -->
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" data-backdrop="static" data-keyboard="false" data-width="75%"></div>
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
+@endpush
+
 @push('js')
+    <!-- CSRF Token di Meta -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
+
     <script>
+        // Function untuk modal
         function modalAction(url = '') {
             $('#myModal').load(url, function() {
                 $('#myModal').modal('show');
             });
         }
-        var tableProgres;
-        $(document).ready(function() {
-            tableProgres = $('#table-progres').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    "url": "{{ url('progres/list') }}",
-                    "dataType": "json",
-                    "type": "POST",
-                    "data": function(d) {
-                        d.filter_kategori = $('.filter_kategori').val();
-                    }
-                },
-                columns: [{
-                    data: "DT_RowIndex",
-                    className: "text-center",
-                    orderable: false,
-                    searchable: false
-                }, {
-                    data: "kegiatan.kegiatan_nama",
-                    className: "",
-                    orderable: true,
-                    searchable: true,
-                }, {
-                    data: "nip",
-                    className: "",
-                    orderable: true,
-                    searchable: true,
-                }, {
-                    data: "tanggal",
-                    className: "",
-                    orderable: true,
-                    searchable: false,
-                    render: function(data) {
-                        return new Date(data).toLocaleDateString('id-ID');
-                    }
-                }, {
-                    data: "deskripsi",
-                    className: "",
-                    orderable: true,
-                    searchable: true,
-                }, 
-                {
-                    data: "file_dokumen",
-                    className: "",
-                    orderable: false,
-                    searchable: false,
-                    render: function(data) {
-                        return data ? 
-                            '<a href="{{ url("progres/download") }}/' + data + '" class="btn btn-sm btn-primary"><i class="fa fa-download"></i> Download</a>' : 
-                            'Tidak ada dokumen';
+
+        // Function untuk menghapus data
+        function deleteData(url) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#table-agenda_progres').DataTable().ajax.reload();
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
                         }
                     },
-                {
-                    data: "aksi",
-                    className: "text-center",
-                    orderable: false,
-                    searchable: false
-                }]
-            });
-            $('#table-progres_filter input').unbind().bind().on('keyup', function(e) {
-                if (e.keyCode == 13) { // enter key
-                    tableProgres.search(this.value).draw();
+                    error: function(xhr) {
+                        toastr.error('Terjadi kesalahan: ' + xhr.responseJSON.message);
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function() {
+    var dataProgres = $('#table-agenda_progres').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('progres.list') }}",
+            type: "POST",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: function(d) {
+                d.filter_progress = $('#filter_progress').val(); // Mengirim filter status progress ke backend
+            }
+        },
+        columns: [
+            { data: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
+            { data: "kegiatan_nama", className: "", orderable: true, searchable: true },
+            { data: "nip", className: "", orderable: true, searchable: true },
+            {
+                data: "file_dokumen",
+                orderable: false,
+                searchable: false,
+                render: function(data) {
+                    return data
+                        ? '<a href="{{ route("progres.download", ":filename") }}" class="btn btn-sm btn-primary"><i class="fa fa-download"></i> Download</a>'.replace(':filename', data)
+                        : 'Tidak ada dokumen';
                 }
-            });
-            $('.filter_kategori').change(function() {
-                tableProgres.draw();
-            });
-        });
-    </script>
+            },
+            { data: "file_deskripsi", className: "", orderable: true, searchable: true },
+        ],
+        error: function(xhr) {
+            console.log('Error:', xhr.responseText);
+        }
+    });
+
+    $('#filter_progress').on('change', function() {
+        dataProgres.ajax.reload(); // Mengupdate data ketika filter berubah
+    });
+});
+
+</script>
 @endpush
