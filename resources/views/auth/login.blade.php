@@ -88,7 +88,7 @@
             <div class="login-logo">
                 <img src="{{ asset('image/Jti_polinema.svg.png') }}" alt="Logo">
             </div>
-            <div class="card-header text-center"><a href="{{ url('/') }}" class="h1"><b>SIMTI</b></a></div>
+            <div class="card-header text-center"><a href="{{ url('/home') }}" class="h1"><b>SIMTI</b></a></div>
             <div class="card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
                 <form action="{{ url('login') }}" method="POST" id="form-login">
