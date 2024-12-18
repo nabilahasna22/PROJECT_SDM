@@ -124,7 +124,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
+                    <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == '' ? 'active' : 'daftar_kegiatan' }}">
                         <i class="nav-icon fas fa-layer-group"></i>
                         <p>Kegiatan Diikuti</p>
                     </a>

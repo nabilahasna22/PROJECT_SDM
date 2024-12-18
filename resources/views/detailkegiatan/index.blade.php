@@ -5,16 +5,7 @@
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Daftar Anggota Kegiatan</h3>
-        <div class="card-tools">
-            <button onclick="modalAction('{{ url('/detailkegiatan/import') }}')" class="btn btn-info">Import Data</button>
-            <a href="{{ url('/detailkegiatan/export_excel') }}" class="btn btn-primary">
-                <i class="fa fa-file-excel"></i> Export Excel
-            </a>
-            <a href="{{ url('/detailkegiatan/export_pdf') }}" class="btn btn-warning">
-                <i class="fa fa-file-pdf"></i> Export PDF
-            </a>
-            <button onclick="modalAction('{{ url('/detailkegiatan/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
-        </div>
+        
     </div>
 
     <div class="card-body">
@@ -23,7 +14,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Kegiatan</th>
-                    <th>NIP</th>
+                    <th>Nama</th>
                     <th>Jabatan</th>
                     <th>Bobot</th>
                     
@@ -69,7 +60,7 @@
             columns: [
                 { data: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'kegiatan.kegiatan_nama', defaultContent: '-' },
-                { data: 'user.nip', defaultContent: '-' },
+                { data: 'user.nama', defaultContent: '-' },
                 { data: 'jabatan.nama_jabatan', defaultContent: '-' },
                 { data: 'bobot' },
              
