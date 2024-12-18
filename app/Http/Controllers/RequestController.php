@@ -130,7 +130,7 @@ class RequestController extends Controller
     
             return response()->json([
                 'success' => true,
-                'message' => 'Data kompetensi berhasil disimpan'
+                'message' => 'Data Anggota berhasil disimpan'
             ]);
         } catch (\Exception $e) {
             return response()->json([
