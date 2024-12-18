@@ -217,6 +217,8 @@ Route::prefix('agenda_progres')->group(function () {
     // Index/List
     Route::get('/', [AgendaProgresController::class, 'index'])->name('agenda_progres.index');
     Route::post('/list', [AgendaProgresController::class, 'list'])->name('agenda_progres.list');
+    Route::get('/masuk/{id}',[AgendaProgresController::class,'masuk']);
+    Route::post('/list/{id}',[AgendaProgresController::class,'listanggota']);
     
     // Create
     Route::get('/create', [AgendaProgresController::class, 'create'])->name('agenda_progres.create');
