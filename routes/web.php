@@ -32,9 +32,9 @@ use Symfony\Component\Routing\RequestContext;
 |
 */
 
-Route::get('/', function () {
-    return view('home'); // Pastikan file ini ada di resources/views/home.blade.php
-});
+Route::get('/home', function () {
+    return view('home'); // Mengarahkan ke file home.blade.php
+})->name('home');
 
 Route::pattern('id', '[0-9]+');
 
