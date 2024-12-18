@@ -52,6 +52,9 @@ class ProgresController extends Controller
         
             ->make(true);
     }
+
+    
+
     public function download($filename)
     {
         $filePath = public_path('uploads/dokumen/' . $filename);

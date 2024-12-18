@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\AgendaProgresController;
 use App\Http\Controllers\ApproveController;
+use App\Http\Controllers\KegiatanDiikutiController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StatistikDosenController;
 use Database\Seeders\KegiatanSeeder;
@@ -286,6 +287,12 @@ Route::group(['prefix' => 'statistik_dosen'], function () {
     Route::get('/', [StatistikDosenController::class, 'index'])->name('statistik_dosen.index');
     Route::post('/list', [StatistikDosenController::class, 'list'])->name('statistik_dosen.list');
     Route::get('/detail/{id}', [StatistikDosenController::class, 'detail'])->name('statistik_dosen.detail');
+});
+Route::group(['prefix' => 'kegiatan_diikuti'], function () {
+    Route::get('/', [KegiatanDiikutiController::class, 'index']);  // menampilkan halaman awal
+    Route::get('/export_pdf/{id}', [KegiatanDiikutiController::class, 'export_pdf']);
+    Route::get('/download/{filename}', [KegiatanDiikutiController::class, 'download']);
+
 });
 
 });

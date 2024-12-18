@@ -5,7 +5,7 @@
         <div class="card-header">
             <h3 class="card-title">Daftar Agenda Progress</h3>
             <div class="card-tools">
-               
+                <button onclick="modalAction('{{ url('/agenda_progres/create_ajax') }}')" class="btn btn-success"><i class="fas fa-plus"></i> Tambah Progress</button>
             </div>
         </div>
         <div class="card-body">

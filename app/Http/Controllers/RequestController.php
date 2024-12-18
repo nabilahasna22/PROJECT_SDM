@@ -42,7 +42,7 @@ class RequestController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn() // Menambahkan kolom index
                 ->addColumn('aksi', function ($data) {
-                    $btn = '<a href="'.url('request/masuk/'.$data->kegiatan_id).'" class="edit btn btn-sm btn-primary">Masuk</a>';
+                    $btn = '<a href="'.url('/request/masuk/'.$data->kegiatan_id).'" class="edit btn btn-sm btn-primary">Masuk</a>';
                     return $btn;
                 })
                 ->rawColumns(['aksi']) // Mengizinkan HTML pada kolom action

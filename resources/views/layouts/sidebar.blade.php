@@ -124,15 +124,9 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == '' ? 'active' : 'daftar_kegiatan' }}">
+                    <a href="{{ url('/kegiatan_diikuti') }}" class="nav-link {{ $activeMenu == 'kegiatan_diikuti' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-layer-group"></i>
                         <p>Kegiatan Diikuti</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url('/kegiatan') }}" class="nav-link {{ $activeMenu == 'kegiatan' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-chart-line"></i>
-                        <p>Manajemen Agenda</p>
                     </a>
                 </li>
                 <li class="nav-item">
