@@ -119,63 +119,65 @@ class ProfileController extends Controller
     }
 
     public function update_foto(Request $request, $nip)
-{
-    // Cek apakah request dari AJAX
-    if ($request->ajax() || $request->wantsJson()) {
-        $rules = [
-            'foto' => 'required|mimes:jpeg,png,jpg|max:4096'
-        ];
-
-        // Validasi input
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validasi gagal.',
-                'msgField' => $validator->errors()
-            ]);
-        }
-
-        // Cek apakah pengguna ada
-        $check = UserModel::find($nip);
-        if ($check) {
-            // Jika ada file foto yang diunggah
-            if ($request->hasFile('foto')) {
-                // Nama file lama untuk dihapus
-                $oldFilePath = $check->foto; // Ambil path foto lama dari database
-
-                // Hapus foto lama jika ada
-                if ($oldFilePath && Storage::disk('public')->exists($oldFilePath)) {
-                    Storage::disk('public')->delete($oldFilePath);
-                }
-
-                // Proses penyimpanan foto baru
-                $file = $request->file('foto');
-                $fileName = 'profile_' . $nip . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('public/profile_pictures', $fileName);
-
-                // Update foto di database dengan path relatif
-                $publicPath = 'profile_pictures/' . $fileName;
-
-                // Update foto di database
-                $check->update([
-                    'foto' => $publicPath
+    {
+        // Cek apakah request dari AJAX
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'foto' => 'required|mimes:jpeg,png,jpg|max:4096'
+            ];
+    
+            // Validasi input
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi gagal.',
+                    'msgField' => $validator->errors()
                 ]);
             }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Data berhasil diupdate',
-                'new_photo_url' => $publicPath ?? $check->foto // Tambahkan URL foto baru untuk update tampilan
-            ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Data tidak ditemukan'
-            ]);
+    
+            // Cek apakah pengguna ada
+            $check = UserModel::find($nip);
+            if ($check) {
+                // Jika ada file foto yang diunggah
+                if ($request->hasFile('foto')) {
+                    // Nama file lama untuk dihapus
+                    $oldFilePath = $check->foto; // Ambil path foto lama dari database
+    
+                    // Hapus foto lama jika ada
+                    if ($oldFilePath && Storage::disk('public')->exists($oldFilePath)) {
+                        Storage::disk('public')->delete($oldFilePath);
+                    }
+    
+                    // Proses penyimpanan foto baru
+                    $file = $request->file('foto');
+                    $fileName = 'profile_' . $nip . '.' . $file->getClientOriginalExtension();
+                    
+                    // Gunakan method storeAs dengan disk public
+                    $path = $file->storeAs('profile_pictures', $fileName, 'public');
+    
+                    // Update foto di database dengan path relatif
+                    $publicPath = 'profile_pictures/' . $fileName;
+    
+                    // Update foto di database
+                    $check->update([
+                        'foto' => $publicPath
+                    ]);
+    
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'Data berhasil diupdate',
+                        'new_photo_url' => $publicPath
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data tidak ditemukan'
+                ]);
+            }
         }
+        return redirect('/');
     }
-    return redirect('/');
-}
 
 }
