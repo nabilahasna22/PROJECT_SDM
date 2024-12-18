@@ -12,7 +12,7 @@ class WelcomeController extends Controller
     {
         // Data breadcrumb untuk navigasi
         $breadcrumb = (object)[
-            'title' => 'Selamat Datang',
+            'title' => 'Selamat Datang di Website SIMTI',
             'list'  => ['Home', 'Welcome'],
         ];
 

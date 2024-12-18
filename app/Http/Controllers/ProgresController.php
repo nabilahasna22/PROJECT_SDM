@@ -21,12 +21,12 @@ class ProgresController extends Controller
     {
         $activeMenu = 'progres';
         $breadcrumb = (object) [
-            'title' => 'Daftar Progres',
+            'title' => 'Progres Dosen',
             'list' => ['Home', 'Progres']
         ];
     
         $page = (object) [
-            'title' => 'Daftar progres kegiatan yang terdaftar dalam sistem'
+            'title' => 'Daftar progres dosen'
         ];
     
         $kegiatan = KegiatanModel::select('kegiatan_id', 'kegiatan_nama')->get();
