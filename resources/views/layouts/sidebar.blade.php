@@ -1,13 +1,19 @@
 <div class="sidebar">
     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-            <img src="{{ asset('image/profile.jpg') }}" alt="Profile Picture" class="brand-image img-circle elevation-3" style="opacity: .8; width: 35px; height: 35px;">
+            <img 
+                src="{{ asset('storage/' . Auth::user()->foto) }}" 
+                alt="Profile Picture" 
+                class="brand-image img-circle elevation-3" 
+                style="opacity: .8; width: 35px; height: 35px;">
         </div>
         <div class="info">
-            <!-- Mengambil data nama dan NIP pengguna dari Auth -->
-            <a class="d-block" href="#">{{ Auth::user()->nip }} - {{ Auth::user()->nama }}</a>
-        </div>        
+            <a class="d-block" href="#">
+                {{ Auth::user()->nip }} - {{ Auth::user()->nama }}
+            </a>
+        </div>
     </div>
+    
 
     <!-- SidebarSearch Form -->
     <div class="form-inline mt-2">
@@ -107,25 +113,19 @@
                 <li class="nav-header">Informasi Kegiatan</li>
                 <li class="nav-item">
                     <a href="{{ url('/daftar_kegiatan') }}" class="nav-link {{ $activeMenu == 'daftar_kegiatan' ? 'active' : '' }}">
-                        <i class="nav-icon far fa-calendar"></i>
+                        <i class="nav-icon far fa-calendar-alt"></i>
                         <p>Daftar Kegiatan</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url('/request') }}" class="nav-link {{ $activeMenu == 'request' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-chart-line"></i>
+                        <i class="nav-icon fas fa-users"></i>
                         <p>Request Anggota</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url('/progres') }}" class="nav-link {{ $activeMenu == 'progres' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-chart-line"></i>
-                        <p>Progres Kegiatan</p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-chart-line"></i>
+                        <i class="nav-icon fas fa-layer-group"></i>
                         <p>Kegiatan Diikuti</p>
                     </a>
                 </li>
@@ -138,7 +138,7 @@
                 <li class="nav-item">
                     <a href="{{ url('/agenda_progres') }}" class="nav-link {{ $activeMenu == 'agenda_progres' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-calendar-check"></i>
-                        <p>Update Progress Agenda</p>
+                        <p>Upload Progres</p>
                     </a>
                 </li>
             @endif
