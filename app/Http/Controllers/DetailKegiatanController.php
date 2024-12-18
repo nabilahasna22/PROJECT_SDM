@@ -42,20 +42,11 @@ class DetailKegiatanController extends Controller
 
     public function list(Request $request)
     {
-        $detailKegiatan = DetailKegiatanModel::select('anggota_id', 'kegiatan_id', 'nip', 'id_jabatan', 'bobot')
+        $detailKegiatan = DetailKegiatanModel::select( 'kegiatan_id', 'nip', 'id_jabatan', 'bobot')
             ->with(['kegiatan', 'user', 'jabatan']);
 
         return DataTables::of($detailKegiatan)
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($row) {
-                return '
-                    <div class="btn-group">
-                        <button onclick="modalAction(\''.url('/detailkegiatan/edit/').'/'.$row->anggota_id.'\')" class="btn btn-sm btn-warning">Edit</button>
-                        <button onclick="modalAction(\''.url('/detailkegiatan/show_ajax/').'/'.$row->anggota_id.'\')" class="btn btn-sm btn-info">Detail</button>               
-                    </div>
-                ';
-            })
-            ->rawColumns(['aksi'])
+        ->addIndexColumn() 
             ->make(true);
     }
 

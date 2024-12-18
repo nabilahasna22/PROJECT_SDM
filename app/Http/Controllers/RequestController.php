@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\KegiatanService;
 use App\Http\Resources\KegiatanResource;
 use App\Http\Resources\PendingApprovalResource;
+use App\Models\DetailKegiatanModel;
 use App\Models\JabatanModel;
 use App\Models\KegiatanModel;
 use App\Models\RequestModel;
@@ -176,7 +177,4 @@ class RequestController extends Controller
     ]);
 }
 
-    
 }
-
-

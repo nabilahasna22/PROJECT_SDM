@@ -30,20 +30,15 @@ class StatistikDosenController extends Controller
             if ($request->ajax()) {
                 // Ambil data statistik dosen dari model StatistikDosen
                 $data = StatistikDosenModel::getDataDosen();
-
+    
                 return DataTables::of($data)
-                    ->addIndexColumn()
-                    ->addColumn('aksi', function ($row) {
-                        // Ganti tombol aksi Edit dan Delete dengan Detail
-                        return '<a href="' . route('statistik_dosen.detail', $row->nip) . '" class="text-info">[Detail]</a>';
-                    })
-                    ->rawColumns(['aksi']) // Render HTML untuk kolom aksi
-                    ->make(true);
+                    ->addIndexColumn() // Tambahkan indeks untuk setiap baris
+                    ->make(true); // Hilangkan kolom 'aksi'
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }
+    }    
 
     // Menampilkan detail statistik dosen
     public function detail($nip)
