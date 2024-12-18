@@ -48,7 +48,7 @@
                     <img src="{{ asset('storage/' . session('profile_img_path')) }}" alt="Foto Profil"
                         class="brand-image img-circle elevation-3">
                 @else
-                    <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo"
+                    <img src="{{ asset('image/Jti_polinema.svg.png') }}" alt="AdminLTE Logo"
                         class="brand-image img-circle elevation-3" style="opacity: .8">
                 @endif    
                 <span class="brand-text font-weight-light"> SIMTI</span>

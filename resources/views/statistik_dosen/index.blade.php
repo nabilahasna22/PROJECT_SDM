@@ -116,7 +116,7 @@
                         <th>Non Program</th>
                         <th>Non JTI</th>
                         <th>Total Bobot</th>
-                        <th>Aksi</th>
+                        {{-- <th>Aksi</th> --}}
                     </tr>
                 </thead>
             </table>
@@ -132,79 +132,102 @@
 
 <script>
     $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    });
+
+    // Inisialisasi DataTables
+    var dataStatistikDosen = $('#table_statistik_dosen').DataTable({
+        serverSide: true,
+        processing: true,
+        ajax: {
+            url: "{{ route('statistik_dosen.list') }}",
+            type: "POST",
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+                alert('Terjadi kesalahan: ' + error);
             }
-        });
-
-        var dataStatistikDosen = $('#table_statistik_dosen').DataTable({
-            serverSide: true,
-            processing: true,
-            ajax: {
-                url: "{{ route('statistik_dosen.list') }}",
-                type: "POST",
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
-                    alert('Terjadi kesalahan: ' + error);
-                }
-            },
-            columns: [
-                { data: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
-                { data: "nama_dosen", className: "text-center" },
-                { data: "total_kegiatan", className: "text-center" },
-                { data: "terprogram", className: "text-center" },
-                { data: "non_program", className: "text-center" },
-                { data: "non_jti", className: "text-center" },
-                { data: "total_bobot", className: "text-center", render: function(data, type, row) {
-                    // Create a canvas for the chart
-                    var canvasId = 'chart-bobot-' + row.id;
-                    setTimeout(function() {
-                        createDoughnutChart(canvasId, row.total_bobot);  // Create doughnut chart
-                    }, 10);
+        },
+        columns: [
+            { data: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
+            { data: "nama_dosen", className: "text-center" },
+            { data: "total_kegiatan", className: "text-center" },
+            { data: "terprogram", className: "text-center" },
+            { data: "non_program", className: "text-center" },
+            { data: "non_jti", className: "text-center" },
+            { 
+                data: "total_bobot", 
+                className: "text-center", 
+                render: function(data, type, row, meta) {
+                    // Gunakan ID unik berdasarkan row index
+                    var canvasId = `chart-bobot-${meta.row}`;
                     return `<canvas id="${canvasId}" width="100%" height="150"></canvas>`;
-                }},
-                { 
-                    data: "aksi",
-                    className: "text-center",
-                    orderable: false,
-                    searchable: false,
-                    render: function(data, type, row) {
-                        return `<a href="{{ url('statistik_dosen/detail') }}/${row.id}" class="text-info">[Detail]</a>`;
-                    }
                 }
-            ],
-            order: [[1, 'asc']]
-        });
+            }
+        ],
+        order: [[1, 'asc']],
+        drawCallback: function(settings) {
+            // Bersihkan chart lama sebelum menggambar ulang
+            clearCharts();
 
-        function createDoughnutChart(canvasId, bobotData) {
-            var ctx = document.getElementById(canvasId).getContext('2d');
+            // Buat chart baru untuk setiap baris
+            var api = this.api();
+            api.rows().every(function(rowIdx, tableLoop, rowLoop) {
+                var data = this.data(); // Data per baris
+                var canvasId = `chart-bobot-${rowIdx}`;
+                createDoughnutChart(canvasId, data.total_bobot);
+            });
+        }
+    });
+
+    // Variabel global untuk menyimpan instance Chart.js
+    var charts = [];
+
+    // Fungsi membersihkan chart lama
+    function clearCharts() {
+        charts.forEach(function(chart) {
+            chart.destroy();
+        });
+        charts = [];
+    }
+
+    // Fungsi untuk membuat chart
+    function createDoughnutChart(canvasId, bobotData) {
+        var canvas = document.getElementById(canvasId);
+        if (canvas) {
+            var ctx = canvas.getContext('2d');
             var chartData = {
-                labels: ['Total Bobot', 'Remaining'],  // Labeling the sections
+                labels: ['Total Bobot', 'Remaining'],  // Label untuk chart
                 datasets: [{
                     label: 'Total Bobot',
-                    data: [bobotData, 100 - bobotData],  // Total Bobot and Remaining part
-                    backgroundColor: ['#ffc107', '#e0e0e0'],  // Yellow for the data, gray for remaining
+                    data: [bobotData, 100 - bobotData],  // Data chart
+                    backgroundColor: ['#ffc107', '#e0e0e0'],  // Warna
                     borderColor: ['#ffc107', '#e0e0e0'],
                     borderWidth: 1
                 }]
             };
 
-            new Chart(ctx, {
-                type: 'doughnut',  // Doughnut chart type
+            var chart = new Chart(ctx, {
+                type: 'doughnut',  // Jenis chart
                 data: chartData,
                 options: {
-                    responsive: true,  // Make it responsive
-                    cutoutPercentage: 70,  // Make it a ring
+                    responsive: true,  // Responsif
+                    cutout: '70%',  // Membuat bentuk cincin
                     plugins: {
                         legend: {
-                            display: false  // Hide the legend if not needed
+                            display: false  // Sembunyikan legenda
                         }
                     }
                 }
             });
+
+            // Simpan instance chart untuk nanti dihancurkan
+            charts.push(chart);
         }
-    });
+    }
+});
 </script>
 
 
